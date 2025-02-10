@@ -38,8 +38,7 @@ const CheckboxTable = () => {
 
 	// Load saved data from localStorage
 	useEffect(() => {
-		const storedData =
-			JSON.parse(localStorage.getItem("checkboxData")) || {};
+		const storedData = JSON.parse(localStorage.getItem("checkboxData")) || {};
 		const storedHidden =
 			JSON.parse(localStorage.getItem("hiddenCheckboxes")) || {};
 		setCheckboxes(storedData);
@@ -195,9 +194,7 @@ const CheckboxTable = () => {
 						{Object.entries(categories).map(([section, tasks]) => (
 							<React.Fragment key={section}>
 								<tr>
-									<th colSpan={characters.length + 1}>
-										{section}
-									</th>
+									<th colSpan={characters.length + 1}>{section}</th>
 								</tr>
 								{tasks.map(({ name }) => (
 									<tr key={name}>
@@ -205,37 +202,18 @@ const CheckboxTable = () => {
 										{characters.map((char) => (
 											<td
 												key={char}
-												onContextMenu={(e) =>
-													handleRightClick(
-														e,
-														char,
-														name
-													)
-												}
+												onContextMenu={(e) => handleRightClick(e, char, name)}
 											>
-												{!hiddenCheckboxes[char]?.[
-													name
-												] && (
+												{!hiddenCheckboxes[char]?.[name] && (
 													<input
 														type="checkbox"
 														className={
-															hiddenCheckboxes[
-																char
-															]?.[name]
+															hiddenCheckboxes[char]?.[name]
 																? "hidden-checkbox"
 																: ""
 														}
-														checked={
-															checkboxes[char]?.[
-																name
-															] || false
-														}
-														onChange={() =>
-															handleCheckboxChange(
-																char,
-																name
-															)
-														}
+														checked={checkboxes[char]?.[name] || false}
+														onChange={() => handleCheckboxChange(char, name)}
 													/>
 												)}
 											</td>
@@ -254,16 +232,10 @@ const CheckboxTable = () => {
 							left: contextMenu.x + "px",
 						}}
 					>
-						<div
-							className="menu-item"
-							onClick={() => handleMenuClick(false)}
-						>
+						<div className="menu-item" onClick={() => handleMenuClick(false)}>
 							Show {contextMenu.isHidden ? "" : "✔"}
 						</div>
-						<div
-							className="menu-item"
-							onClick={() => handleMenuClick(true)}
-						>
+						<div className="menu-item" onClick={() => handleMenuClick(true)}>
 							Hide {contextMenu.isHidden ? "✔" : ""}
 						</div>
 					</div>
