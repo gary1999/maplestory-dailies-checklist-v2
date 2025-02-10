@@ -1,0 +1,92 @@
+.clock-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	width: 100%;
+}
+
+.clock {
+	display: flex;
+}
+
+.table-container {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+}
+
+table {
+	width: 100%;
+	max-width: 1000px; /* Adjust with more characters */
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+
+th,
+td {
+	text-align: center;
+	vertical-align: middle;
+	padding: 5px;
+	width: 1%;
+}
+
+input[type="checkbox"] {
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	width: 20px; /* Increase size */
+	height: 20px;
+	border-radius: 6px; /* Slightly rounded corners */
+	border: 3px solid #333; /* Thicker border */
+	display: inline-block;
+	position: relative;
+	cursor: pointer;
+	background-color: white;
+}
+
+input[type="checkbox"]:checked {
+	background-color: #4caf50;
+	border-color: #4caf50;
+}
+
+input[type="checkbox"]:checked::before {
+	content: "✔";
+	font-size: 16px; /* Increase checkmark size */
+	color: white;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+input[type="checkbox"] {
+	transition: all 0.3s ease;
+}
+
+input[type="checkbox"]:hover {
+	transform: scale(1.2);
+}
+
+.context-menu {
+	position: absolute;
+	background: #222;
+	color: white;
+	border: 1px solid #555;
+	border-radius: 5px;
+	box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+	z-index: 1000;
+	padding: 5px 10px;
+}
+
+.menu-item {
+	padding: 5px;
+	cursor: pointer;
+}
+
+.menu-item:hover {
+	background: #444;
+}
+
+.hidden-checkbox {
+	display: none;
+}
