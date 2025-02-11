@@ -118,8 +118,6 @@ const CheckboxTable = () => {
 	// Reset all checkboxes where type is "daily"
 	const resetDailies = () => {
 		setCheckboxes((prev) => {
-			console.log("🔄 Resetting dailies... Previous state:", prev);
-
 			const updatedCheckboxes = { ...prev };
 
 			characters.forEach((char) => {
@@ -133,8 +131,6 @@ const CheckboxTable = () => {
 						});
 				}
 			});
-
-			console.log("✅ New state after reset:", updatedCheckboxes);
 			return updatedCheckboxes;
 		});
 	};
@@ -173,9 +169,9 @@ const CheckboxTable = () => {
 
 	return (
 		<>
-			{/* <button onClick={checkNextReset.setYesterdayDate}>
+			<button onClick={checkNextReset.setYesterdayDate}>
 				Set Reset Time to Yesterday
-			</button> */}
+			</button>
 			{/* <button onClick={dailyResetCheck}>Click to reset</button> */}
 			<div className="clock-container">
 				<Clock />
