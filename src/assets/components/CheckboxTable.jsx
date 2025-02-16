@@ -1,37 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Clock from "./Clock";
 import checkNextReset from "./CheckNextReset";
+import { characters, categories } from "../data/data";
 
 import "../css/Checkbox.css";
 
 const CheckboxTable = () => {
-	const characters = ["Aran", "Luminous", "Adele", "Shade", "Blaster"];
-	const categories = {
-		Dailies: [
-			{ name: "Arcane River", type: "daily" },
-			{ name: "Grandis", type: "daily" },
-			{ name: "Monster Park", type: "daily" },
-			{ name: "Bosses", type: "daily" },
-		],
-		Weeklies: [{ name: "Legion", type: "weekly" }],
-		"Weekly Bosses": [
-			{ name: "Standard", type: "weekly" },
-			{ name: "Lotus", type: "weekly" },
-			{ name: "Damien", type: "weekly" },
-			{ name: "Slime", type: "weekly" },
-			{ name: "Lucid", type: "weekly" },
-			{ name: "Will", type: "weekly" },
-			{ name: "Gloom", type: "weekly" },
-			{ name: "Verus Hilla", type: "weekly" },
-			{ name: "Darknell", type: "weekly" },
-		],
-		Events: [
-			{ name: "Ride or Die", type: "weekly" },
-			{ name: "Burning 6k", type: "weekly" },
-			{ name: "Tirnog 6k", type: "weekly" },
-		],
-	};
-
 	const [checkboxes, setCheckboxes] = useState({});
 	const [hiddenCheckboxes, setHiddenCheckboxes] = useState({});
 	const [contextMenu, setContextMenu] = useState(null);
@@ -73,6 +47,7 @@ const CheckboxTable = () => {
 
 	const dailyResetCheck = () => {
 		if (checkNextReset.hasTodayReachedSavedDate()) {
+			console.log("Reset condition met. Calling resetDailies()...");
 			resetDailies();
 			checkNextReset.updateSavedDateIfNeeded();
 			console.log("It is daily reset");
@@ -84,7 +59,7 @@ const CheckboxTable = () => {
 			resetWeeklies();
 			checkNextReset.updateSavedThursdayIfNeeded();
 			//console.log("It is weekly reset");
-		} //else console.log("not yet weekly reset");
+		}
 	};
 
 	// Handle right-click to show context menu
@@ -150,28 +125,28 @@ const CheckboxTable = () => {
 						});
 				}
 			});
-
 			return updatedCheckboxes;
 		});
 	};
 
-	const runMinutely = () => {
-		dailyResetCheck();
-		weeklyResetCheck();
-	};
-
 	useEffect(() => {
 		checkNextReset.loadUTCTime();
-		const interval = setInterval(runMinutely, 1000);
-		runMinutely();
-		return () => clearInterval(interval);
+		setTimeout(() => {
+			dailyResetCheck();
+			weeklyResetCheck();
+			const interval = setInterval(() => {
+				dailyResetCheck();
+				weeklyResetCheck();
+			}, 1000 * 5);
+			return () => clearInterval(interval);
+		}, 100); // Small delay to allow reset logic to complete
 	}, []);
 
 	return (
 		<>
-			<button onClick={checkNextReset.setYesterdayDate}>
+			{/* <button onClick={checkNextReset.setYesterdayDate}>
 				Set Reset Time to Yesterday
-			</button>
+			</button> */}
 			{/* <button onClick={dailyResetCheck}>Click to reset</button> */}
 			<div className="clock-container">
 				<Clock />
@@ -201,16 +176,18 @@ const CheckboxTable = () => {
 												onContextMenu={(e) => handleRightClick(e, char, name)}
 											>
 												{!hiddenCheckboxes[char]?.[name] && (
-													<input
-														type="checkbox"
-														className={
-															hiddenCheckboxes[char]?.[name]
-																? "hidden-checkbox"
-																: ""
-														}
-														checked={checkboxes[char]?.[name] || false}
-														onChange={() => handleCheckboxChange(char, name)}
-													/>
+													<label className="checkbox-container">
+														<input
+															type="checkbox"
+															className={
+																hiddenCheckboxes[char]?.[name]
+																	? "hidden-checkbox"
+																	: ""
+															}
+															checked={checkboxes[char]?.[name] || false}
+															onChange={() => handleCheckboxChange(char, name)}
+														/>
+													</label>
 												)}
 											</td>
 										))}

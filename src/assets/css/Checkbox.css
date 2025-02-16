@@ -90,3 +90,11 @@ input[type="checkbox"]:hover {
 .hidden-checkbox {
 	display: none;
 }
+
+.checkbox-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%; /* Make it fill the cell */
+	height: 100%;
+}

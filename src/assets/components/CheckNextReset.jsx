@@ -95,6 +95,17 @@ const setYesterdayDate = () => {
 	console.log("⏳ Set saved date to yesterday:", yesterdayUtc.toISOString());
 };
 
+const setTodayDate = () => {
+	const todayUtc = new Date();
+	todayUtc.setUTCHours(0, 0, 0, 0); // Midnight UTC
+
+	const yesterdayUtc = new Date(todayUtc);
+	yesterdayUtc.setDate(todayUtc.getDate()); // Move to previous day
+
+	localStorage.setItem("savedDateTomorrow", yesterdayUtc.toISOString());
+	console.log("⏳ Set saved date to Today:", yesterdayUtc.toISOString());
+};
+
 const checkNextReset = {
 	loadUTCTime,
 
@@ -107,6 +118,7 @@ const checkNextReset = {
 	updateSavedThursdayIfNeeded,
 
 	setYesterdayDate,
+	setTodayDate,
 };
 
 export default checkNextReset;
