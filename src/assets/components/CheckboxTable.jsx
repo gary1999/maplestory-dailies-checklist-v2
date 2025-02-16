@@ -10,6 +10,16 @@ const CheckboxTable = () => {
 	const [hiddenCheckboxes, setHiddenCheckboxes] = useState({});
 	const [contextMenu, setContextMenu] = useState(null);
 
+	const [collapsedCategories, setCollapsedCategories] = useState({});
+
+	// Toggle collapse state
+	const toggleCollapse = (category) => {
+		setCollapsedCategories((prev) => ({
+			...prev,
+			[category]: !prev[category],
+		}));
+	};
+
 	// Load saved data from localStorage
 	useEffect(() => {
 		const storedData = JSON.parse(localStorage.getItem("checkboxData")) || {};
@@ -164,35 +174,45 @@ const CheckboxTable = () => {
 					<tbody>
 						{Object.entries(categories).map(([section, tasks]) => (
 							<React.Fragment key={section}>
-								<tr>
-									<th colSpan={characters.length + 1}>{section}</th>
+								{/* Clickable Header for Collapsing */}
+								<tr
+									className="category-header"
+									onClick={() => toggleCollapse(section)}
+								>
+									<th colSpan={characters.length + 1}>
+										{section} {collapsedCategories[section] ? "▲" : "▼"}
+									</th>
 								</tr>
-								{tasks.map(({ name }) => (
-									<tr key={name}>
-										<td>{name}</td>
-										{characters.map((char) => (
-											<td
-												key={char}
-												onContextMenu={(e) => handleRightClick(e, char, name)}
-											>
-												{!hiddenCheckboxes[char]?.[name] && (
-													<label className="checkbox-container">
-														<input
-															type="checkbox"
-															className={
-																hiddenCheckboxes[char]?.[name]
-																	? "hidden-checkbox"
-																	: ""
-															}
-															checked={checkboxes[char]?.[name] || false}
-															onChange={() => handleCheckboxChange(char, name)}
-														/>
-													</label>
-												)}
-											</td>
-										))}
-									</tr>
-								))}
+								{/* Render tasks only if category is not collapsed */}
+								{!collapsedCategories[section] &&
+									tasks.map(({ name }) => (
+										<tr key={name}>
+											<td>{name}</td>
+											{characters.map((char) => (
+												<td
+													key={char}
+													onContextMenu={(e) => handleRightClick(e, char, name)}
+												>
+													{!hiddenCheckboxes[char]?.[name] && (
+														<label className="checkbox-container">
+															<input
+																type="checkbox"
+																className={
+																	hiddenCheckboxes[char]?.[name]
+																		? "hidden-checkbox"
+																		: ""
+																}
+																checked={checkboxes[char]?.[name] || false}
+																onChange={() =>
+																	handleCheckboxChange(char, name)
+																}
+															/>
+														</label>
+													)}
+												</td>
+											))}
+										</tr>
+									))}
 							</React.Fragment>
 						))}
 					</tbody>

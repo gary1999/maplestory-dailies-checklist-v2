@@ -98,3 +98,20 @@ input[type="checkbox"]:hover {
 	width: 100%; /* Make it fill the cell */
 	height: 100%;
 }
+
+.category-header {
+	background-color: #333;
+	color: white;
+	cursor: pointer;
+	text-align: center;
+	transition: background-color 0.3s ease;
+}
+
+.category-header:hover {
+	background-color: #444;
+}
+
+/* Optional: Hide rows smoothly */
+tbody tr {
+	transition: all 0.3s ease-in-out;
+}
