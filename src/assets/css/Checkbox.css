@@ -113,5 +113,15 @@ input[type="checkbox"]:hover {
 
 /* Optional: Hide rows smoothly */
 tbody tr {
-	transition: all 0.3s ease-in-out;
+	transition: max-height 0.6s ease-in-out, opacity 0.6s ease-in-out;
+	max-height: 100px; /* Adjust based on content */
+	opacity: 1;
+	overflow: hidden;
+}
+
+/* When collapsed, set max-height to 0 and fade out */
+tbody tr.collapsed {
+	max-height: 0;
+	opacity: 0;
+	pointer-events: none;
 }

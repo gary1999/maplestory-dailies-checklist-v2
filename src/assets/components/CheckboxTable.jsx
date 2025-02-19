@@ -4,6 +4,7 @@ import checkNextReset from "./CheckNextReset";
 import { characters, categories } from "../data/data";
 
 import "../css/Checkbox.css";
+import CurrencyCalculator from "./CurrencyCalculator";
 
 const CheckboxTable = () => {
 	const [checkboxes, setCheckboxes] = useState({});
@@ -158,9 +159,6 @@ const CheckboxTable = () => {
 				Set Reset Time to Yesterday
 			</button> */}
 			{/* <button onClick={dailyResetCheck}>Click to reset</button> */}
-			<div className="clock-container">
-				<Clock />
-			</div>
 			<div className="table-container" onClick={handleCloseMenu}>
 				<table border="1">
 					<thead>
@@ -234,6 +232,7 @@ const CheckboxTable = () => {
 					</div>
 				)}
 			</div>
+			{/* <CurrencyCalculator /> */}
 		</>
 	);
 };

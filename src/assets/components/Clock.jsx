@@ -59,7 +59,7 @@ export default function Clock() {
 	return (
 		<>
 			{/* <div className="clock">TIME IN GAME: {currentUTCTime()}</div> */}
-			<div className="clock">TIME UNTIL RESET: {timeUntilReset()}</div>
+			<div className="clock">RESET: {timeUntilReset()}</div>
 		</>
 	);
 }
