@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
+import { characters as initialCharacters, categories } from "../data/data";
 import Clock from "./Clock";
 import checkNextReset from "./CheckNextReset";
-import { characters, categories } from "../data/data";
-
 import "../css/Checkbox.css";
 import CurrencyCalculator from "./CurrencyCalculator";
 
 const CheckboxTable = () => {
+	const [characters, setCharacters] = useState(() => {
+		const savedCharacters =
+			JSON.parse(localStorage.getItem("characters")) || initialCharacters;
+		return savedCharacters;
+	});
+
 	const [checkboxes, setCheckboxes] = useState({});
 	const [hiddenCheckboxes, setHiddenCheckboxes] = useState({});
 	const [contextMenu, setContextMenu] = useState(null);
-
 	const [collapsedCategories, setCollapsedCategories] = useState({});
 
 	// Toggle collapse state
@@ -46,6 +50,11 @@ const CheckboxTable = () => {
 		}
 	}, [hiddenCheckboxes]);
 
+	// Save characters to localStorage whenever they change
+	useEffect(() => {
+		localStorage.setItem("characters", JSON.stringify(characters));
+	}, [characters]);
+
 	const handleCheckboxChange = (character, task) => {
 		setCheckboxes((prev) => ({
 			...prev,
@@ -62,14 +71,13 @@ const CheckboxTable = () => {
 			resetDailies();
 			checkNextReset.updateSavedDateIfNeeded();
 			console.log("It is daily reset");
-		} //else console.log("not yet daily reset");
+		}
 	};
 
 	const weeklyResetCheck = () => {
 		if (checkNextReset.hasTodayReachedSavedThursday()) {
 			resetWeeklies();
 			checkNextReset.updateSavedThursdayIfNeeded();
-			//console.log("It is weekly reset");
 		}
 	};
 
@@ -101,8 +109,7 @@ const CheckboxTable = () => {
 		}
 	};
 
-	// Reset all checkboxes where type is "daily"
-	const resetDailies = () => {
+	const resetCheckboxes = (type) => {
 		setCheckboxes((prev) => {
 			const updatedCheckboxes = { ...prev };
 
@@ -110,8 +117,8 @@ const CheckboxTable = () => {
 				if (updatedCheckboxes[char]) {
 					Object.values(categories)
 						.flat()
-						.forEach(({ name, type }) => {
-							if (type === "daily") {
+						.forEach(({ name, type: taskType }) => {
+							if (taskType === type) {
 								updatedCheckboxes[char][name] = false;
 							}
 						});
@@ -121,51 +128,91 @@ const CheckboxTable = () => {
 		});
 	};
 
-	const resetWeeklies = () => {
-		setCheckboxes((prev) => {
-			const updatedCheckboxes = { ...prev };
-
-			characters.forEach((char) => {
-				if (updatedCheckboxes[char]) {
-					Object.values(categories)
-						.flat()
-						.forEach(({ name, type }) => {
-							if (type === "weekly") {
-								updatedCheckboxes[char][name] = false;
-							}
-						});
-				}
-			});
-			return updatedCheckboxes;
-		});
-	};
+	// Replace resetDailies and resetWeeklies with:
+	const resetDailies = () => resetCheckboxes("daily");
+	const resetWeeklies = () => resetCheckboxes("weekly");
 
 	useEffect(() => {
 		checkNextReset.loadUTCTime();
-		setTimeout(() => {
-			dailyResetCheck();
-			weeklyResetCheck();
-			const interval = setInterval(() => {
-				dailyResetCheck();
-				weeklyResetCheck();
-			}, 1000 * 5);
-			return () => clearInterval(interval);
-		}, 100); // Small delay to allow reset logic to complete
+
+		// Immediate check for resets when the page loads
+		if (checkNextReset.hasTodayReachedSavedDate()) {
+			resetDailies();
+			checkNextReset.updateSavedDateIfNeeded();
+		}
+		if (checkNextReset.hasTodayReachedSavedThursday()) {
+			resetWeeklies();
+			checkNextReset.updateSavedThursdayIfNeeded();
+		}
+
+		// Set up interval for periodic checks
+		const interval = setInterval(() => {
+			if (checkNextReset.hasTodayReachedSavedDate()) {
+				resetDailies();
+				checkNextReset.updateSavedDateIfNeeded();
+			}
+			if (checkNextReset.hasTodayReachedSavedThursday()) {
+				resetWeeklies();
+				checkNextReset.updateSavedThursdayIfNeeded();
+			}
+		}, 1000 * 10); // Check every 10 seconds
+
+		return () => clearInterval(interval);
 	}, []);
+
+	const handleManualDateBack = () => {
+		checkNextReset.setDateBack(); // Set the date back
+		dailyResetCheck(); // Trigger daily reset check
+		weeklyResetCheck(); // Trigger weekly reset check
+	};
+
+	// Rename a character
+	const renameCharacter = (index, newName) => {
+		setCharacters((prevCharacters) => {
+			const updatedCharacters = [...prevCharacters];
+			const oldName = updatedCharacters[index];
+			updatedCharacters[index] = newName;
+
+			// Update the checkboxes state to reflect the new name
+			setCheckboxes((prevCheckboxes) => {
+				const updatedCheckboxes = { ...prevCheckboxes };
+				if (updatedCheckboxes[oldName]) {
+					updatedCheckboxes[newName] = updatedCheckboxes[oldName];
+					delete updatedCheckboxes[oldName];
+				}
+				return updatedCheckboxes;
+			});
+
+			// Update the hiddenCheckboxes state to reflect the new name
+			setHiddenCheckboxes((prevHidden) => {
+				const updatedHidden = { ...prevHidden };
+				if (updatedHidden[oldName]) {
+					updatedHidden[newName] = updatedHidden[oldName];
+					delete updatedHidden[oldName];
+				}
+				return updatedHidden;
+			});
+
+			return updatedCharacters;
+		});
+	};
 
 	return (
 		<>
-			{/* <button onClick={checkNextReset.setYesterdayDate}>
-				Set Reset Time to Yesterday
-			</button> */}
-			{/* <button onClick={dailyResetCheck}>Click to reset</button> */}
 			<div className="table-container" onClick={handleCloseMenu}>
 				<table border="1">
 					<thead>
 						<tr>
 							<th></th>
-							{characters.map((char) => (
-								<th key={char}>{char}</th>
+							{characters.map((char, index) => (
+								<th key={index}>
+									<input
+										type="text"
+										value={char}
+										onChange={(e) => renameCharacter(index, e.target.value)}
+										className="character-name-input"
+									/>
+								</th>
 							))}
 						</tr>
 					</thead>
@@ -232,6 +279,11 @@ const CheckboxTable = () => {
 					</div>
 				)}
 			</div>
+			<button onClick={handleManualDateBack}>
+				Set Date Back and Trigger Resets
+			</button>
+			<button onClick={resetDailies}>Manual Reset Dailies</button>
+			<button onClick={resetWeeklies}>Manual Reset Weeklies</button>
 			{/* <CurrencyCalculator /> */}
 		</>
 	);

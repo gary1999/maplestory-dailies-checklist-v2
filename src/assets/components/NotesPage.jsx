@@ -1,28 +1,62 @@
 import React, { useState, useEffect } from "react";
-import { characters } from "../data/data";
+import { characters as initialCharacters, categories } from "../data/data";
+import CheckboxTable from "./CheckboxTable";
+import "../css/NotesPage.css";
 
 const NotesPage = () => {
-	const [notes, setNotes] = useState(() => {
-		return JSON.parse(localStorage.getItem("notes")) || {};
+	const [characters, setCharacters] = useState(() => {
+		const savedCharacters =
+			JSON.parse(localStorage.getItem("characters")) || initialCharacters;
+		return savedCharacters;
 	});
 
-	useEffect(() => {
-		const storedNotes =
-			JSON.parse(localStorage.getItem("characterNotes")) || {};
-		setNotes(storedNotes);
-	}, []);
+	const [notes, setNotes] = useState(() => {
+		return JSON.parse(localStorage.getItem("characterNotes")) || {};
+	});
 
+	const [taskInputs, setTaskInputs] = useState({});
+	const [cursorPositions, setCursorPositions] = useState({});
+
+	// Save characters to localStorage whenever they change
+	useEffect(() => {
+		localStorage.setItem("characters", JSON.stringify(characters));
+	}, [characters]);
+
+	// Save notes to localStorage whenever they change
 	useEffect(() => {
 		localStorage.setItem("characterNotes", JSON.stringify(notes));
 	}, [notes]);
 
-	const handleNoteChange = (character, newNote) => {
+	// Handle note changes
+	const handleNoteChange = (character, newNote, cursorPosition) => {
 		setNotes((prevNotes) => ({
 			...prevNotes,
 			[character]: { ...prevNotes[character], note: newNote },
 		}));
+		setCursorPositions((prev) => ({ ...prev, [character]: cursorPosition }));
 	};
 
+	// Handle cursor position changes
+	const handleCursorPosition = (character, cursorPosition) => {
+		setCursorPositions((prev) => ({ ...prev, [character]: cursorPosition }));
+	};
+
+	// Restore cursor position after re-render
+	useEffect(() => {
+		characters.forEach((character) => {
+			const textarea = document.querySelector(
+				`.character-section[data-character="${character}"] .notes-input`
+			);
+			if (textarea && cursorPositions[character] !== undefined) {
+				textarea.setSelectionRange(
+					cursorPositions[character],
+					cursorPositions[character]
+				);
+			}
+		});
+	}, [notes, cursorPositions]);
+
+	// Add a new task
 	const addTask = (character, taskName) => {
 		if (!taskName.trim()) return;
 		setNotes((prevNotes) => {
@@ -35,12 +69,17 @@ const NotesPage = () => {
 				[character]: { ...prevNotes[character], tasks: updatedTasks },
 			};
 		});
+		setTaskInputs((prev) => ({ ...prev, [character]: "" }));
 	};
 
+	// Toggle task completion
 	const toggleTask = (character, index) => {
 		setNotes((prevNotes) => {
 			const updatedTasks = [...(prevNotes[character]?.tasks || [])];
-			updatedTasks[index].checked = !updatedTasks[index].checked;
+			updatedTasks[index] = {
+				...updatedTasks[index],
+				checked: !updatedTasks[index].checked,
+			};
 			return {
 				...prevNotes,
 				[character]: { ...prevNotes[character], tasks: updatedTasks },
@@ -48,6 +87,7 @@ const NotesPage = () => {
 		});
 	};
 
+	// Delete a task
 	const deleteTask = (character, index) => {
 		setNotes((prevNotes) => {
 			const updatedTasks = [...(prevNotes[character]?.tasks || [])];
@@ -59,51 +99,94 @@ const NotesPage = () => {
 		});
 	};
 
+	// Rename a character
+	const renameCharacter = (index, newName) => {
+		setCharacters((prevCharacters) => {
+			const updatedCharacters = [...prevCharacters];
+			const oldName = updatedCharacters[index];
+			updatedCharacters[index] = newName;
+
+			// Update the notes state to reflect the new name
+			setNotes((prevNotes) => {
+				const updatedNotes = { ...prevNotes };
+				if (updatedNotes[oldName]) {
+					updatedNotes[newName] = updatedNotes[oldName];
+					delete updatedNotes[oldName];
+				}
+				return updatedNotes;
+			});
+
+			return updatedCharacters;
+		});
+	};
+
 	return (
-		<div>
+		<div className="notes-page">
 			<h2>Character Notes</h2>
-			{characters.map((character) => (
-				<div key={character}>
-					<h3>{character}</h3>
-					<textarea
-						value={notes[character]?.note || ""}
-						onChange={(e) => handleNoteChange(character, e.target.value)}
-						placeholder="Enter notes here..."
-					/>
-					<div>
+			<div className="character-sections">
+				{characters.map((character, index) => (
+					<div
+						key={index}
+						className="character-section"
+						data-character={character}
+					>
 						<input
 							type="text"
-							id={`taskInput-${character}`}
-							placeholder="Add a task..."
+							value={character}
+							onChange={(e) => renameCharacter(index, e.target.value)}
+							className="character-name-input"
 						/>
-						<button
-							onClick={() =>
-								addTask(
+						<textarea
+							className="notes-input"
+							value={notes[character]?.note || ""}
+							onChange={(e) =>
+								handleNoteChange(
 									character,
-									document.getElementById(`taskInput-${character}`).value
+									e.target.value,
+									e.target.selectionStart
 								)
 							}
-						>
-							Add Task
-						</button>
+							onKeyUp={(e) =>
+								handleCursorPosition(character, e.target.selectionStart)
+							}
+							placeholder="Enter notes here..."
+						/>
+						<div className="task-input">
+							<input
+								type="text"
+								value={taskInputs[character] || ""}
+								onChange={(e) =>
+									setTaskInputs((prev) => ({
+										...prev,
+										[character]: e.target.value,
+									}))
+								}
+								placeholder="Add a task..."
+							/>
+							<button onClick={() => addTask(character, taskInputs[character])}>
+								Add Task
+							</button>
+						</div>
+						<ul className="task-list">
+							{(notes[character]?.tasks || []).map((task, taskIndex) => (
+								<li key={taskIndex} className="task-item">
+									<input
+										type="checkbox"
+										checked={task.checked || false}
+										onChange={() => toggleTask(character, taskIndex)}
+									/>
+									<span className={task.checked ? "completed" : ""}>
+										{task.name}
+									</span>
+									<button onClick={() => deleteTask(character, taskIndex)}>
+										Delete
+									</button>
+								</li>
+							))}
+						</ul>
 					</div>
-					<ul>
-						{(notes[character] || []).map((task, index) => (
-							<div key={index}>
-								<input
-									type="checkbox"
-									checked={task.checked}
-									onChange={() => toggleTask(character, index)}
-								/>
-								<span>{task.text}</span>
-								<button onClick={() => deleteTask(character, index)}>
-									Delete
-								</button>
-							</div>
-						))}
-					</ul>
-				</div>
-			))}
+				))}
+			</div>
 		</div>
 	);
 };

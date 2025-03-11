@@ -125,3 +125,18 @@ tbody tr.collapsed {
 	opacity: 0;
 	pointer-events: none;
 }
+
+.character-name-input {
+	font-size: 1rem;
+	font-weight: bold;
+	color: #1abc9c; /* Teal for headings */
+	background-color: transparent;
+	border: none;
+	outline: none;
+	text-align: center;
+	width: 100%;
+}
+
+.character-name-input:focus {
+	border-bottom: 2px solid #1abc9c; /* Teal border on focus */
+}

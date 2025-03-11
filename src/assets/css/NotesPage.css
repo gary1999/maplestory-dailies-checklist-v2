@@ -1,0 +1,194 @@
+/* Notes Page Container */
+.notes-page {
+	padding: 1rem;
+	max-width: 100%; /* Allow full width */
+	margin: 0 auto;
+	background-color: #1e1e1e; /* Dark background */
+	color: #f5f5f5; /* Light text */
+	min-height: 100vh; /* Full height */
+}
+
+/* Character Sections Container */
+.character-sections {
+	display: flex;
+	gap: 1rem; /* Space between character sections */
+	overflow-x: auto; /* Add horizontal scroll if content overflows */
+	padding-bottom: 1rem; /* Add padding to prevent clipping */
+}
+
+/* Individual Character Section */
+.character-section {
+	flex: 0 0 300px; /* Flex-grow: 0, Flex-shrink: 0, Flex-basis: 300px */
+	width: 300px; /* Fixed width */
+	padding: 1rem;
+	background-color: #333; /* Dark background */
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Darker shadow */
+	overflow-y: auto; /* Add vertical scroll if content overflows */
+	max-height: 80vh; /* Limit height to 80% of the viewport height */
+}
+
+.character-section h3 {
+	margin-top: 0;
+	color: #1abc9c; /* Teal for headings */
+	text-align: center;
+}
+
+/* Notes Input */
+.notes-input {
+	width: 100%;
+	min-height: 200px; /* Minimum height */
+	max-height: 200px; /* Maximum height before scrolling */
+	padding: 0.5rem;
+	border: 3px solid #444; /* Thicker border */
+	border-radius: 6px; /* Slightly rounded corners */
+	font-family: inherit;
+	font-size: 1rem;
+	background-color: #222; /* Darker background */
+	color: #f5f5f5; /* Light text */
+	outline: none; /* Remove default focus outline */
+	overflow-y: auto; /* Add vertical scrollbar if content overflows */
+	white-space: pre-wrap; /* Preserve line breaks */
+	box-sizing: border-box; /* Include padding and border in the element's total width and height */
+	resize: none; /* Disable resizing */
+	transition: border-color 0.3s ease; /* Smooth transition for focus */
+}
+
+.notes-input:focus {
+	border-color: #1abc9c; /* Teal border on focus */
+}
+
+/* Task Input */
+.task-input {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 1rem;
+}
+
+.task-input input {
+	flex: 1;
+	padding: 0.5rem;
+	border: 3px solid #444; /* Thicker border */
+	border-radius: 6px; /* Slightly rounded corners */
+	font-size: 1rem;
+	background-color: #222; /* Darker background */
+	color: #f5f5f5; /* Light text */
+	outline: none; /* Remove default focus outline */
+	transition: border-color 0.3s ease; /* Smooth transition for focus */
+}
+
+.task-input input:focus {
+	border-color: #1abc9c; /* Teal border on focus */
+}
+
+.task-input button {
+	padding: 0.5rem 1rem;
+	background-color: #1abc9c; /* Teal for buttons */
+	color: white;
+	border: none;
+	border-radius: 6px; /* Slightly rounded corners */
+	cursor: pointer;
+	font-size: 1rem;
+	transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.task-input button:hover {
+	background-color: #16a085; /* Darker teal on hover */
+}
+
+/* Task List */
+.task-list {
+	list-style: none;
+	padding: 0;
+	margin-top: 1rem;
+}
+
+.task-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem;
+	background-color: #222; /* Darker background for tasks */
+	border: 3px solid #444; /* Thicker border */
+	border-radius: 6px; /* Slightly rounded corners */
+	margin-bottom: 0.5rem;
+	transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.task-item:hover {
+	background-color: #333; /* Lighter background on hover */
+}
+
+.task-item input[type="checkbox"] {
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	width: 20px; /* Increase size */
+	height: 20px;
+	border-radius: 6px; /* Slightly rounded corners */
+	border: 3px solid #444; /* Thicker border */
+	display: inline-block;
+	position: relative;
+	cursor: pointer;
+	background-color: #222; /* Darker background */
+	transition: all 0.3s ease; /* Smooth transition for hover and checked */
+}
+
+.task-item input[type="checkbox"]:checked {
+	background-color: #4caf50; /* Green background when checked */
+	border-color: #4caf50; /* Green border when checked */
+}
+
+.task-item input[type="checkbox"]:checked::before {
+	content: "✔";
+	font-size: 16px; /* Increase checkmark size */
+	color: white;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.task-item input[type="checkbox"]:hover {
+	transform: scale(1.2); /* Slightly enlarge on hover */
+}
+
+.task-item span {
+	flex: 1;
+	color: #f5f5f5; /* Light text */
+}
+
+.task-item span.completed {
+	text-decoration: line-through;
+	color: #888; /* Gray for completed tasks */
+}
+
+.task-item button {
+	padding: 0.25rem 0.5rem;
+	background-color: #e74c3c; /* Red for delete button */
+	color: white;
+	border: none;
+	border-radius: 6px; /* Slightly rounded corners */
+	cursor: pointer;
+	font-size: 0.9rem;
+	transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.task-item button:hover {
+	background-color: #c0392b; /* Darker red on hover */
+}
+
+.character-name-input {
+	font-size: 1.2rem;
+	font-weight: bold;
+	color: #1abc9c; /* Teal for headings */
+	background-color: transparent;
+	border: none;
+	outline: none;
+	text-align: center;
+	margin-bottom: 1rem;
+}
+
+.character-name-input:focus {
+	border-bottom: 2px solid #1abc9c; /* Teal border on focus */
+}

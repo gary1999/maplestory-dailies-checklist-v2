@@ -1,5 +1,10 @@
+const getUTCMidnight = () => {
+	const date = new Date();
+	date.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
+	return date;
+};
+
 const loadUTCTime = () => {
-	// Retrieve the UTC time from localStorage
 	const savedDateStr = localStorage.getItem("savedDateTomorrow");
 	const savedDateStrThursday = localStorage.getItem("savedDateThursday");
 
@@ -11,10 +16,18 @@ const loadUTCTime = () => {
 	}
 };
 
-function saveTomorrowDate() {
-	const todayUtc = new Date();
-	todayUtc.setUTCHours(0, 0, 0, 0); // Midnight UTC
+window.onload = () => {
+	loadUTCTime();
 
+	if (hasTodayReachedSavedDate()) {
+		updateSavedDateIfNeeded();
+	}
+	if (hasTodayReachedSavedThursday()) {
+		updateSavedThursdayIfNeeded();
+	}
+};
+function saveTomorrowDate() {
+	const todayUtc = getUTCMidnight();
 	const tomorrowUtc = new Date(todayUtc);
 	tomorrowUtc.setDate(todayUtc.getDate() + 1); // Move to next day
 
@@ -22,21 +35,29 @@ function saveTomorrowDate() {
 	console.log("Saved Tomorrow's Date (UTC):", tomorrowUtc.toISOString());
 }
 
-function hasTodayReachedSavedDate() {
-	const savedDateStr = localStorage.getItem("savedDateTomorrow");
+const isValidDate = (date) => {
+	return date instanceof Date && !isNaN(date);
+};
+
+const hasDatePassed = (savedDateStr) => {
 	if (!savedDateStr) {
 		console.log("No saved date found.");
 		return false;
 	}
 
 	const savedDate = new Date(savedDateStr);
-
-	// Get today's date at UTC midnight
-	const todayUtc = new Date();
-	todayUtc.setUTCHours(0, 0, 0, 0);
-
-	// console.log("Has Today Reached Saved Date?", hasTodayReachedSavedDate());
+	const todayUtc = getUTCMidnight();
 	return todayUtc >= savedDate;
+};
+
+function hasTodayReachedSavedDate() {
+	const savedDateStr = localStorage.getItem("savedDateTomorrow");
+	return hasDatePassed(savedDateStr);
+}
+
+function hasTodayReachedSavedThursday() {
+	const savedDateStrThursday = localStorage.getItem("savedDateThursday");
+	return hasDatePassed(savedDateStrThursday);
 }
 
 function updateSavedDateIfNeeded() {
@@ -45,11 +66,15 @@ function updateSavedDateIfNeeded() {
 		console.log("Updated saved date to the next tomorrow.");
 	}
 }
+function updateSavedThursdayIfNeeded() {
+	if (hasTodayReachedSavedThursday()) {
+		saveNextThursday(); // Move the saved date to the next Thursday
+		console.log("Updated saved date to the next Thursday.");
+	}
+}
 
 function saveNextThursday() {
-	const todayUtc = new Date();
-	todayUtc.setUTCHours(0, 0, 0, 0); // Midnight UTC
-
+	const todayUtc = getUTCMidnight();
 	const nextThursday = new Date(todayUtc);
 	const dayOfWeek = todayUtc.getUTCDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
@@ -59,29 +84,6 @@ function saveNextThursday() {
 
 	localStorage.setItem("savedDateThursday", nextThursday.toISOString());
 	console.log("Saved Next Thursday (UTC):", nextThursday.toISOString());
-}
-
-function hasTodayReachedSavedThursday() {
-	const savedDateStrThursday = localStorage.getItem("savedDateThursday");
-	if (!savedDateStrThursday) {
-		console.log("No saved date found.");
-		return false;
-	}
-
-	const savedDateThursday = new Date(savedDateStrThursday);
-
-	// Get today's date at UTC midnight
-	const todayUtc = new Date();
-	todayUtc.setUTCHours(0, 0, 0, 0);
-
-	return todayUtc >= savedDateThursday;
-}
-
-function updateSavedThursdayIfNeeded() {
-	if (hasTodayReachedSavedThursday()) {
-		saveNextThursday(); // Move the saved date to the next Thursday
-		console.log("Updated saved date to the next Thursday.");
-	}
 }
 
 const setYesterdayDate = () => {
@@ -106,15 +108,36 @@ const setTodayDate = () => {
 	console.log("⏳ Set saved date to Today:", yesterdayUtc.toISOString());
 };
 
+const setDateBack = () => {
+	const todayUtc = getUTCMidnight();
+	const yesterdayUtc = new Date(todayUtc);
+	yesterdayUtc.setDate(todayUtc.getDate() - 1); // Move back one day
+
+	// Update both saved dates
+	localStorage.setItem("savedDateTomorrow", yesterdayUtc.toISOString());
+	localStorage.setItem("savedDateThursday", yesterdayUtc.toISOString());
+
+	console.log(
+		"⏳ Set saved dates back to yesterday:",
+		yesterdayUtc.toISOString()
+	);
+};
+
 const checkNextReset = {
 	loadUTCTime,
+	hasTodayReachedSavedDate: () =>
+		hasDatePassed(localStorage.getItem("savedDateTomorrow")),
+	hasTodayReachedSavedThursday: () =>
+		hasDatePassed(localStorage.getItem("savedDateThursday")),
+
+	setDateBack,
 
 	saveTomorrowDate,
-	hasTodayReachedSavedDate,
+	// hasTodayReachedSavedDate,
+	// hasTodayReachedSavedThursday,
 	updateSavedDateIfNeeded,
 
 	saveNextThursday,
-	hasTodayReachedSavedThursday,
 	updateSavedThursdayIfNeeded,
 
 	setYesterdayDate,
