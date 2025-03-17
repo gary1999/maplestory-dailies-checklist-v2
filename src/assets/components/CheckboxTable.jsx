@@ -84,9 +84,17 @@ const CheckboxTable = () => {
 	// Handle right-click to show context menu
 	const handleRightClick = (e, character, task) => {
 		e.preventDefault();
+		const { clientX: x, clientY: y } = e;
+		const menuWidth = 150; // Approximate width of the context menu
+		const menuHeight = 80; // Approximate height of the context menu
+
+		// Adjust position if near the edge of the screen
+		const adjustedX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
+		const adjustedY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
+
 		setContextMenu({
-			x: e.clientX,
-			y: e.clientY,
+			x: adjustedX,
+			y: adjustedY,
 			character,
 			task,
 			isHidden: hiddenCheckboxes[character]?.[task] || false,
@@ -128,6 +136,15 @@ const CheckboxTable = () => {
 		});
 	};
 
+	const confirmReset = (type) => {
+		if (window.confirm(`Are you sure you want to reset all ${type} tasks?`)) {
+			if (type === "daily") {
+				resetDailies();
+			} else if (type === "weekly") {
+				resetWeeklies();
+			}
+		}
+	};
 	// Replace resetDailies and resetWeeklies with:
 	const resetDailies = () => resetCheckboxes("daily");
 	const resetWeeklies = () => resetCheckboxes("weekly");
@@ -282,8 +299,12 @@ const CheckboxTable = () => {
 			<button onClick={handleManualDateBack}>
 				Set Date Back and Trigger Resets
 			</button>
-			<button onClick={resetDailies}>Manual Reset Dailies</button>
-			<button onClick={resetWeeklies}>Manual Reset Weeklies</button>
+			<button onClick={() => confirmReset("daily")}>
+				Manual Reset Dailies
+			</button>
+			<button onClick={() => confirmReset("weekly")}>
+				Manual Reset Weeklies
+			</button>
 			{/* <CurrencyCalculator /> */}
 		</>
 	);

@@ -19,6 +19,8 @@ export const categories = {
 		{ name: "Verus Hilla", type: "weekly" },
 		{ name: "Darknell", type: "weekly" },
 		{ name: "Seren", type: "weekly" },
+		{ name: "Kalos", type: "weekly" },
+		{ name: "Kaling", type: "weekly" },
 	],
 	Events: [
 		// { name: "Ride or Die", type: "weekly" },
