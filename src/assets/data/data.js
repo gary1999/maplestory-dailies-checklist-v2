@@ -36,7 +36,7 @@ export const categories = {
 		{
 			name: "Rock Spirit Spirit Check In",
 			type: "weekly",
-			count: 5,
+			count: 1,
 		},
 		{ name: "Demon Slayer Check In", type: "weekly", count: 5 },
 	],
