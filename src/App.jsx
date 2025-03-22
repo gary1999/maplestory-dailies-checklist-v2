@@ -5,9 +5,9 @@ import "./assets/css/Navbar.css";
 import Clock from "./assets/components/Clock";
 
 // import Navbar from "./assets/components/Navbar";
+import Navbar from "./assets/components/Navbar";
 import CheckboxTable from "./assets/components/CheckboxTable";
 import NotesPage from "./assets/components/NotesPage";
-import Navbar from "./assets/components/Navbar";
 
 function App() {
 	return (
@@ -18,6 +18,7 @@ function App() {
 				<Route path="/" element={<CheckboxTable />} />
 				<Route path="/notes" element={<NotesPage />} />
 				{/* <Route path="/enhancements" element={#} /> */}
+				{/* <Route path="/misc" element={#} /> */}
 			</Routes>
 		</Router>
 	);

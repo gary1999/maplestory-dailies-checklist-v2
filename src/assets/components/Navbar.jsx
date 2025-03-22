@@ -26,9 +26,15 @@ const Navbar = () => {
 					>
 						Enhancements
 					</NavLink>
+					<NavLink
+						to="/misc"
+						className={({ isActive }) => (isActive ? "active" : "")}
+					>
+						Misc
+					</NavLink>
 				</li>
-				<Clock />
 			</ul>
+			<Clock />
 		</nav>
 	);
 };
