@@ -1,0 +1,9 @@
+<script>
+	var redirectTo = location.pathname;
+	if (redirectTo.startsWith("/maplestory-dailies-checklist-v2")) {
+		redirectTo = redirectTo.replace("/maplestory-dailies-checklist-v2", "");
+	}
+	window.location.replace(
+		"/maplestory-dailies-checklist-v2" + "/#" + redirectTo
+	);
+</script>
