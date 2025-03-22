@@ -7,77 +7,61 @@ export default function Clock() {
 		const intervalId = setInterval(() => {
 			setTime(new Date());
 		}, 1000);
-
-		return () => {
-			clearInterval(intervalId);
-		};
+		return () => clearInterval(intervalId);
 	}, []);
 
-	const currentUTCTime = () => {
-		let hours = Math.floor(time.getUTCHours());
-		const minutes = Math.floor(time.getUTCMinutes());
-		const seconds = Math.floor(time.getUTCSeconds());
-
-		hours = hours % 12 || 12;
-
-		return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
-	};
+	const padZero = (number) => (number < 10 ? "0" : "") + number;
 
 	const timeUntilReset = () => {
 		const now = time;
-		const currentUTCDay = now.getUTCDate();
-
-		// Create a Date object for the next day's midnight UTC
 		const midnightUTC = new Date(
 			Date.UTC(
 				now.getUTCFullYear(),
 				now.getUTCMonth(),
-				currentUTCDay + 1,
+				now.getUTCDate() + 1, // Next day
 				0,
 				0,
 				0
 			)
 		);
 
-		// Calculate the difference in milliseconds
-		const timeDifference = midnightUTC - now;
-
-		const hours = Math.floor(timeDifference / 3600000); // 1 hour = 3600000 ms
-		const minutes = Math.floor((timeDifference % 3600000) / 60000); // 1 minute = 60000 ms
-		const seconds = Math.floor((timeDifference % 60000) / 1000); // 1 second = 1000 ms
-
-		return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+		return formatTimeDifference(midnightUTC - now);
 	};
 
 	const timeUntilThursdayReset = () => {
 		const now = time;
-		const currentUTCDay = now.getUTCDay(); // 0 (Sunday) to 6 (Saturday)
-		const daysUntilThursday = (4 - currentUTCDay + 7) % 7; // Days until next Thursday
+		let daysUntilThursday = (4 - now.getUTCDay() + 7) % 7;
+		if (daysUntilThursday === 0 && now.getUTCHours() >= 0) {
+			daysUntilThursday = 7; // Move to next Thursday if it's already Thursday after reset time
+		}
 
-		// Create a Date object for the next Thursday's midnight UTC
 		const nextThursdayUTC = new Date(
 			Date.UTC(
 				now.getUTCFullYear(),
 				now.getUTCMonth(),
 				now.getUTCDate() + daysUntilThursday,
-				0, // Hours
-				0, // Minutes
-				0 // Seconds
+				0,
+				0,
+				0
 			)
 		);
 
-		// Calculate the difference in milliseconds
 		const timeDifference = nextThursdayUTC - now;
+		const hours = Math.floor(timeDifference / 3600000);
 
-		const hours = Math.floor(timeDifference / 3600000); // 1 hour = 3600000 ms
-		const minutes = Math.floor((timeDifference % 3600000) / 60000); // 1 minute = 60000 ms
-		const seconds = Math.floor((timeDifference % 60000) / 1000); // 1 second = 1000 ms
+		if (hours >= 24) {
+			const days = Math.floor(hours / 24);
+			return `${days} day${days > 1 ? "s" : ""}`;
+		}
 
-		return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+		return formatTimeDifference(timeDifference);
 	};
 
-	const padZero = (number) => {
-		return (number < 10 ? "0" : "") + number;
+	const formatTimeDifference = (ms) => {
+		const hours = Math.floor(ms / 3600000);
+		const minutes = Math.floor((ms % 3600000) / 60000);
+		const seconds = Math.floor((ms % 60000) / 1000);
+		return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
 	};
 
 	return (

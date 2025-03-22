@@ -1,5 +1,3 @@
-export const characters = ["Aran", "Luminous", "Adele", "Shade", "Blaster"];
-
 export const categories = {
 	Dailies: [
 		{ name: "Arcane River", type: "daily", count: 1 },
