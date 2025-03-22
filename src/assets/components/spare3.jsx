@@ -125,42 +125,47 @@ const CheckboxTable = () => {
 	// Handle checkbox changes
 	const handleCheckboxChange = (columnIndex, task, index) => {
 		setCheckboxes((prev) => {
-			const updatedCheckboxes = {
-				...prev,
-				[columnIndex]: {
-					...prev[columnIndex],
-					[task]: {
-						...(prev[columnIndex]?.[task] || {}),
-						[index]: !prev[columnIndex]?.[task]?.[index],
-					},
-				},
+			const updatedCheckboxes = { ...prev };
+			const taskCheckboxes =
+				updatedCheckboxes[columnIndex]?.[task] ||
+				Array(categories[section].find((t) => t.name === task).count).fill(
+					false
+				);
+			taskCheckboxes[index] = !taskCheckboxes[index]; // Toggle the checkbox state
+			updatedCheckboxes[columnIndex] = {
+				...updatedCheckboxes[columnIndex],
+				[task]: taskCheckboxes,
 			};
 			return updatedCheckboxes;
 		});
 	};
 
-	// Handle right-click (hide checkbox)
+	// Handle right-click to show context menu
 	const handleRightClick = (e, columnIndex, task) => {
 		e.preventDefault();
-		setHiddenCheckboxes((prev) => ({
-			...prev,
-			[columnIndex]: {
-				...prev[columnIndex],
-				[task]: true, // Hide the checkbox on right-click
-			},
-		}));
+		setContextMenu({
+			x: e.clientX,
+			y: e.clientY,
+			columnIndex,
+			task,
+			isHidden: hiddenCheckboxes[columnIndex]?.[task] || false,
+		});
 	};
 
-	// Handle left-click (show checkbox)
-	const handleLeftClick = (e, columnIndex, task) => {
-		if (hiddenCheckboxes[columnIndex]?.[task]) {
-			setHiddenCheckboxes((prev) => ({
-				...prev,
-				[columnIndex]: {
-					...prev[columnIndex],
-					[task]: false, // Show the checkbox on left-click if hidden
-				},
-			}));
+	// Handle context menu actions
+	const handleMenuClick = (shouldHide) => {
+		const { columnIndex, task } = contextMenu;
+		setHiddenCheckboxes((prev) => ({
+			...prev,
+			[columnIndex]: { ...prev[columnIndex], [task]: shouldHide },
+		}));
+		setContextMenu(null);
+	};
+
+	// Close context menu on click outside
+	const handleCloseMenu = (e) => {
+		if (contextMenu) {
+			setContextMenu(null);
 		}
 	};
 
@@ -260,7 +265,7 @@ const CheckboxTable = () => {
 	return (
 		<div className="container">
 			{/* Table */}
-			<div className="table-container">
+			<div className="table-container" onClick={handleCloseMenu}>
 				<table>
 					<thead>
 						<tr>
@@ -299,12 +304,13 @@ const CheckboxTable = () => {
 											{columns.map((columnIndex) => (
 												<td
 													key={columnIndex}
-													onClick={(e) => handleLeftClick(e, columnIndex, name)} // Show checkbox on left-click
+													onClick={() =>
+														handleCheckboxChange(columnIndex, name, 0)
+													} // Toggle the first checkbox in the cell
 													onContextMenu={(e) =>
 														handleRightClick(e, columnIndex, name)
-													} // Hide checkbox on right-click
+													}
 												>
-													{/* Render the checkboxes only if not hidden */}
 													{!hiddenCheckboxes[columnIndex]?.[name] && (
 														<div className="checkbox-group">
 															{Array.from({ length: count }, (_, index) => (
@@ -319,14 +325,14 @@ const CheckboxTable = () => {
 																				index
 																			] || false
 																		}
-																		onChange={() =>
+																		onChange={(e) => {
+																			e.stopPropagation(); // Prevent the cell's onClick from firing
 																			handleCheckboxChange(
 																				columnIndex,
 																				name,
 																				index
-																			)
-																		} // Toggle checkbox state when clicked
-																		onClick={(e) => e.stopPropagation()} // Prevent click from bubbling to the parent <td>
+																			);
+																		}}
 																	/>
 																</label>
 															))}
@@ -340,6 +346,22 @@ const CheckboxTable = () => {
 						))}
 					</tbody>
 				</table>
+				{contextMenu && (
+					<div
+						className="context-menu"
+						style={{
+							top: contextMenu.y + "px",
+							left: contextMenu.x + "px",
+						}}
+					>
+						<div className="menu-item" onClick={() => handleMenuClick(false)}>
+							Show {contextMenu.isHidden ? "" : "✔"}
+						</div>
+						<div className="menu-item" onClick={() => handleMenuClick(true)}>
+							Hide {contextMenu.isHidden ? "✔" : ""}
+						</div>
+					</div>
+				)}
 			</div>
 
 			{/* Manual Reset Buttons */}
