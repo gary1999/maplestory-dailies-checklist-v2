@@ -9,7 +9,7 @@ import NotesPage from "./assets/components/NotesPage";
 
 function App() {
 	return (
-		<Router basename="/maplestory-dailies-checklist-v2">
+		<Router>
 			<Navbar />
 			<Routes>
 				<Route path="/" element={<CheckboxTable />} />
