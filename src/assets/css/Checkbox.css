@@ -29,22 +29,11 @@ td {
 	text-align: center;
 	vertical-align: middle;
 	padding: 5px;
-	width: auto; /* Allow cells to expand based on content */
+	width: auto;
+	min-width: 160px; /* Ensure columns have a minimum width of 170px */
 	border: 1px solid #ccc;
 	white-space: nowrap; /* Prevent text from wrapping */
-}
-
-/* Table Header */
-th {
-	border: 1px solid #999;
-	background-color: #333;
-	color: white;
-	cursor: pointer;
-	transition: background-color 0.3s ease;
-}
-
-th:hover {
-	background-color: #444;
+	position: relative; /* Needed for absolute positioning of placeholders */
 }
 
 /* Checkbox Styling */
@@ -82,21 +71,41 @@ input[type="checkbox"]:hover {
 /* Checkbox Group */
 .checkbox-group {
 	display: flex;
-	flex-direction: row; /* Align checkboxes horizontally */
-	justify-content: center; /* Center checkboxes horizontally */
-	align-items: center; /* Center checkboxes vertically */
-	gap: 5px; /* Add space between checkboxes */
-	flex-wrap: nowrap; /* Prevent checkboxes from wrapping to the next line */
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+	flex-wrap: nowrap;
+	width: 100%;
 }
 
 /* Checkbox Container */
 .checkbox-container {
 	display: flex;
-	justify-content: center; /* Center checkbox horizontally */
-	align-items: center; /* Center checkbox vertically */
-	flex: 0 0 auto; /* Prevent labels from growing */
+	justify-content: center;
+	align-items: center;
+	flex: 0 0 auto;
 }
 
+/* Placeholder for hidden checkboxes */
+.checkbox-placeholder {
+	width: 20px; /* Match the width of the checkbox */
+	height: 20px; /* Match the height of the checkbox */
+	border-radius: 6px;
+	border: 3px solid #ccc; /* Border color to match checkbox */
+	background-color: transparent; /* Transparent to hide it */
+}
+
+/* Updated for hiding checkboxes */
+.checkbox-container.hidden-checkboxes::after {
+	content: ""; /* Add invisible element to maintain space */
+	display: block;
+	width: 20px; /* Matches checkbox width */
+	height: 20px; /* Matches checkbox height */
+	background-color: transparent;
+}
+
+/* Hidden Checkboxes */
 .hidden-checkbox {
 	display: none;
 }

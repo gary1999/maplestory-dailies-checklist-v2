@@ -305,7 +305,7 @@ const CheckboxTable = () => {
 													} // Hide checkbox on right-click
 												>
 													{/* Render the checkboxes only if not hidden */}
-													{!hiddenCheckboxes[columnIndex]?.[name] && (
+													{!hiddenCheckboxes[columnIndex]?.[name] ? (
 														<div className="checkbox-group">
 															{Array.from({ length: count }, (_, index) => (
 																<label
@@ -325,12 +325,13 @@ const CheckboxTable = () => {
 																				name,
 																				index
 																			)
-																		} // Toggle checkbox state when clicked
-																		onClick={(e) => e.stopPropagation()} // Prevent click from bubbling to the parent <td>
+																		}
 																	/>
 																</label>
 															))}
 														</div>
+													) : (
+														<div className="checkbox-container hidden-checkboxes"></div>
 													)}
 												</td>
 											))}
