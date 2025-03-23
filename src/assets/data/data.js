@@ -33,7 +33,7 @@ export const categories = {
 		// { name: "Tirnog 6k", type: "weekly" },
 		{
 			name: "Rock Spirit Spirit Check In",
-			type: "weekly",
+			type: "daily",
 			count: 1,
 		},
 		{ name: "Demon Slayer Check In", type: "weekly", count: 5 },
