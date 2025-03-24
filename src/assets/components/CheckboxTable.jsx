@@ -170,9 +170,20 @@ const CheckboxTable = () => {
 			const updatedCheckboxes = { ...prev };
 			Object.keys(updatedCheckboxes).forEach((columnIndex) => {
 				Object.keys(updatedCheckboxes[columnIndex]).forEach((task) => {
-					if (categories.Dailies.some((daily) => daily.name === task)) {
+					// Check if the task exists in Dailies OR Events with type 'daily'
+					if (
+						categories.Dailies.some((daily) => daily.name === task) ||
+						categories.Events.some(
+							(event) => event.name === task && event.type === "daily"
+						)
+					) {
+						// Find the task and reset its count properly
+						const taskData = categories.Dailies.concat(categories.Events).find(
+							(t) => t.name === task && t.type === "daily"
+						);
+
 						updatedCheckboxes[columnIndex][task] = Array(
-							categories.Dailies.find((t) => t.name === task).count
+							taskData?.count || 1
 						).fill(false);
 					}
 				});
