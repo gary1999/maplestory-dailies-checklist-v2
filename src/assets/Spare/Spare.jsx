@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { characters as initialCharacters, categories } from "../data/data";
-import Clock from "./Clock";
-import checkNextReset from "./CheckNextReset";
+import Clock from "../components/Clock";
+import checkNextReset from "../components/CheckNextReset";
 import "../css/Checkbox.css";
-import CurrencyCalculator from "./CurrencyCalculator";
+import CurrencyCalculator from "../components/CurrencyCalculator";
 
 const CheckboxTable = () => {
 	const [characters, setCharacters] = useState(() => {

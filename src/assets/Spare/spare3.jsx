@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { categories } from "../data/data";
-import checkNextReset from "./checkNextReset";
+import checkNextReset from "../components/checkNextReset";
 import "../css/Checkbox.css";
 
 const CheckboxTable = () => {
@@ -10,12 +10,12 @@ const CheckboxTable = () => {
 		return savedColumns ? parseInt(savedColumns, 10) : 5;
 	});
 
-	// State for column labels (default: ["Column 1", "Column 2", ...])
+	// State for column labels (default: ["Character 1", "Character 2", ...])
 	const [columnLabels, setColumnLabels] = useState(() => {
 		const savedLabels = localStorage.getItem("columnLabels");
 		return savedLabels
 			? JSON.parse(savedLabels)
-			: Array.from({ length: numberOfColumns }, (_, i) => `Column ${i + 1}`);
+			: Array.from({ length: numberOfColumns }, (_, i) => `Character ${i + 1}`);
 	});
 
 	// State for checkboxes (load from localStorage if available)
@@ -31,7 +31,18 @@ const CheckboxTable = () => {
 	});
 
 	const [contextMenu, setContextMenu] = useState(null);
-	const [collapsedCategories, setCollapsedCategories] = useState({});
+
+	// State for collapsed categories
+	const [collapsedCategories, setCollapsedCategories] = useState(() => {
+		const savedCollapsedCategories = localStorage.getItem(
+			"collapsedCategories"
+		);
+		return savedCollapsedCategories
+			? JSON.parse(savedCollapsedCategories)
+			: Object.fromEntries(
+					Object.keys(categories).map((category) => [category, false])
+			  );
+	});
 
 	// Generate an array of column indices (e.g., [0, 1, 2, 3, 4] for 5 columns)
 	const columns = Array.from({ length: numberOfColumns }, (_, i) => i);
@@ -73,6 +84,14 @@ const CheckboxTable = () => {
 		localStorage.setItem("hiddenCheckboxes", JSON.stringify(hiddenCheckboxes));
 	}, [hiddenCheckboxes]);
 
+	// Save collapsedCategories to localStorage whenever it changes
+	useEffect(() => {
+		localStorage.setItem(
+			"collapsedCategories",
+			JSON.stringify(collapsedCategories)
+		);
+	}, [collapsedCategories]);
+
 	// Handle column selection
 	const handleColumnSelect = (number) => {
 		setNumberOfColumns(number);
@@ -80,7 +99,7 @@ const CheckboxTable = () => {
 		setColumnLabels((prevLabels) => {
 			const newLabels = [...prevLabels];
 			while (newLabels.length < number) {
-				newLabels.push(`Column ${newLabels.length + 1}`);
+				newLabels.push(`Character ${newLabels.length + 1}`);
 			}
 			return newLabels.slice(0, number);
 		});
@@ -104,45 +123,44 @@ const CheckboxTable = () => {
 	};
 
 	// Handle checkbox changes
-	const handleCheckboxChange = (columnIndex, task) => {
+	const handleCheckboxChange = (columnIndex, task, index) => {
 		setCheckboxes((prev) => {
 			const updatedCheckboxes = {
 				...prev,
 				[columnIndex]: {
 					...prev[columnIndex],
-					[task]: !prev[columnIndex]?.[task],
+					[task]: {
+						...(prev[columnIndex]?.[task] || {}),
+						[index]: !prev[columnIndex]?.[task]?.[index],
+					},
 				},
 			};
 			return updatedCheckboxes;
 		});
 	};
 
-	// Handle right-click to show context menu
+	// Handle right-click (hide checkbox)
 	const handleRightClick = (e, columnIndex, task) => {
 		e.preventDefault();
-		setContextMenu({
-			x: e.clientX,
-			y: e.clientY,
-			columnIndex,
-			task,
-			isHidden: hiddenCheckboxes[columnIndex]?.[task] || false,
-		});
-	};
-
-	// Handle context menu actions
-	const handleMenuClick = (shouldHide) => {
-		const { columnIndex, task } = contextMenu;
 		setHiddenCheckboxes((prev) => ({
 			...prev,
-			[columnIndex]: { ...prev[columnIndex], [task]: shouldHide },
+			[columnIndex]: {
+				...prev[columnIndex],
+				[task]: true, // Hide the checkbox on right-click
+			},
 		}));
-		setContextMenu(null);
 	};
 
-	// Close context menu on click outside
-	const handleCloseMenu = (e) => {
-		if (contextMenu) {
-			setContextMenu(null);
+	// Handle left-click (show checkbox)
+	const handleLeftClick = (e, columnIndex, task) => {
+		if (hiddenCheckboxes[columnIndex]?.[task]) {
+			setHiddenCheckboxes((prev) => ({
+				...prev,
+				[columnIndex]: {
+					...prev[columnIndex],
+					[task]: false, // Show the checkbox on left-click if hidden
+				},
+			}));
 		}
 	};
 
@@ -152,8 +170,21 @@ const CheckboxTable = () => {
 			const updatedCheckboxes = { ...prev };
 			Object.keys(updatedCheckboxes).forEach((columnIndex) => {
 				Object.keys(updatedCheckboxes[columnIndex]).forEach((task) => {
-					if (categories.Dailies.some((daily) => daily.name === task)) {
-						updatedCheckboxes[columnIndex][task] = false;
+					// Check if the task exists in Dailies OR Events with type 'daily'
+					if (
+						categories.Dailies.some((daily) => daily.name === task) ||
+						categories.Events.some(
+							(event) => event.name === task && event.type === "daily"
+						)
+					) {
+						// Find the task and reset its count properly
+						const taskData = categories.Dailies.concat(categories.Events).find(
+							(t) => t.name === task && t.type === "daily"
+						);
+
+						updatedCheckboxes[columnIndex][task] = Array(
+							taskData?.count || 1
+						).fill(false);
 					}
 				});
 			});
@@ -169,9 +200,15 @@ const CheckboxTable = () => {
 				Object.keys(updatedCheckboxes[columnIndex]).forEach((task) => {
 					if (
 						categories.Weeklies.some((weekly) => weekly.name === task) ||
-						categories["Weekly Bosses"].some((boss) => boss.name === task)
+						categories["Weekly Bosses"].some((boss) => boss.name === task) ||
+						categories.Events.some((event) => event.name === task) // Include Events
 					) {
-						updatedCheckboxes[columnIndex][task] = false;
+						updatedCheckboxes[columnIndex][task] = Array(
+							categories.Weeklies.concat(
+								categories["Weekly Bosses"],
+								categories.Events
+							).find((t) => t.name === task).count
+						).fill(false);
 					}
 				});
 			});
@@ -214,34 +251,27 @@ const CheckboxTable = () => {
 			localStorage.removeItem("columnLabels");
 			localStorage.removeItem("checkboxes");
 			localStorage.removeItem("hiddenCheckboxes");
+			localStorage.removeItem("collapsedCategories");
 
 			// Reset state to defaults
 			setNumberOfColumns(5);
-			setColumnLabels(Array.from({ length: 5 }, (_, i) => `Column ${i + 1}`));
+			setColumnLabels(
+				Array.from({ length: 5 }, (_, i) => `Character ${i + 1}`)
+			);
 			setCheckboxes({});
 			setHiddenCheckboxes({});
-			setCollapsedCategories({});
+			setCollapsedCategories(
+				Object.fromEntries(
+					Object.keys(categories).map((category) => [category, false])
+				)
+			);
 		}
 	};
 
 	return (
-		<div className="clock-container">
-			{/* Column Selector */}
-			<div className="column-selector">
-				<p>Select number of columns:</p>
-				{[1, 2, 3, 4, 5, 6].map((number) => (
-					<button
-						key={number}
-						onClick={() => handleColumnSelect(number)}
-						className={numberOfColumns === number ? "active" : ""}
-					>
-						{number}
-					</button>
-				))}
-			</div>
-
+		<div className="container">
 			{/* Table */}
-			<div className="table-container" onClick={handleCloseMenu}>
+			<div className="table-container">
 				<table>
 					<thead>
 						<tr>
@@ -274,33 +304,45 @@ const CheckboxTable = () => {
 								</tr>
 								{/* Render tasks only if category is not collapsed */}
 								{!collapsedCategories[section] &&
-									tasks.map(({ name }) => (
+									tasks.map(({ name, count }) => (
 										<tr key={name}>
 											<td>{name}</td>
 											{columns.map((columnIndex) => (
 												<td
 													key={columnIndex}
+													onClick={(e) => handleLeftClick(e, columnIndex, name)} // Show checkbox on left-click
 													onContextMenu={(e) =>
 														handleRightClick(e, columnIndex, name)
-													}
+													} // Hide checkbox on right-click
 												>
-													{!hiddenCheckboxes[columnIndex]?.[name] && (
-														<label className="checkbox-container">
-															<input
-																type="checkbox"
-																className={
-																	hiddenCheckboxes[columnIndex]?.[name]
-																		? "hidden-checkbox"
-																		: ""
-																}
-																checked={
-																	checkboxes[columnIndex]?.[name] || false
-																}
-																onChange={() =>
-																	handleCheckboxChange(columnIndex, name)
-																}
-															/>
-														</label>
+													{/* Render the checkboxes only if not hidden */}
+													{!hiddenCheckboxes[columnIndex]?.[name] ? (
+														<div className="checkbox-group">
+															{Array.from({ length: count }, (_, index) => (
+																<label
+																	key={index}
+																	className="checkbox-container"
+																>
+																	<input
+																		type="checkbox"
+																		checked={
+																			checkboxes[columnIndex]?.[name]?.[
+																				index
+																			] || false
+																		}
+																		onChange={() =>
+																			handleCheckboxChange(
+																				columnIndex,
+																				name,
+																				index
+																			)
+																		}
+																	/>
+																</label>
+															))}
+														</div>
+													) : (
+														<div className="checkbox-container hidden-checkboxes"></div>
 													)}
 												</td>
 											))}
@@ -310,22 +352,6 @@ const CheckboxTable = () => {
 						))}
 					</tbody>
 				</table>
-				{contextMenu && (
-					<div
-						className="context-menu"
-						style={{
-							top: contextMenu.y + "px",
-							left: contextMenu.x + "px",
-						}}
-					>
-						<div className="menu-item" onClick={() => handleMenuClick(false)}>
-							Show {contextMenu.isHidden ? "" : "✔"}
-						</div>
-						<div className="menu-item" onClick={() => handleMenuClick(true)}>
-							Hide {contextMenu.isHidden ? "✔" : ""}
-						</div>
-					</div>
-				)}
 			</div>
 
 			{/* Manual Reset Buttons */}
@@ -338,6 +364,18 @@ const CheckboxTable = () => {
 				</button>
 			</div>
 
+			<div className="column-selector">
+				<p>Number of Characters:</p>
+				{[1, 2, 3, 4, 5, 6].map((number) => (
+					<button
+						key={number}
+						onClick={() => handleColumnSelect(number)}
+						className={numberOfColumns === number ? "active" : ""}
+					>
+						{number}
+					</button>
+				))}
+			</div>
 			{/* Clear LocalStorage Button */}
 			<button onClick={clearLocalStorage} className="clear-button">
 				Clear All Saved Data

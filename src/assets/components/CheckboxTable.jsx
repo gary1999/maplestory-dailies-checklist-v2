@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { categories } from "../data/data";
-import checkNextReset from "./checkNextReset";
+import checkNextReset from "../components/checkNextReset";
 import "../css/Checkbox.css";
 
 const CheckboxTable = () => {
@@ -124,8 +124,24 @@ const CheckboxTable = () => {
 
 	// Handle checkbox changes
 	const handleCheckboxChange = (columnIndex, task, index) => {
-		setCheckboxes((prev) => {
-			const updatedCheckboxes = {
+		if (task === "ALL" && index === 0) {
+			// Special case for the ALL checkbox
+			setCheckboxes((prev) => {
+				const updated = { ...prev };
+				categories["Weekly Bosses"].forEach((boss) => {
+					if (boss.name !== "ALL") {
+						// Skip the ALL entry itself
+						updated[columnIndex] = {
+							...updated[columnIndex],
+							[boss.name]: Array(boss.count).fill(true),
+						};
+					}
+				});
+				return updated;
+			});
+		} else {
+			// Normal checkbox behavior
+			setCheckboxes((prev) => ({
 				...prev,
 				[columnIndex]: {
 					...prev[columnIndex],
@@ -134,21 +150,8 @@ const CheckboxTable = () => {
 						[index]: !prev[columnIndex]?.[task]?.[index],
 					},
 				},
-			};
-			return updatedCheckboxes;
-		});
-	};
-
-	// Handle right-click (hide checkbox)
-	const handleRightClick = (e, columnIndex, task) => {
-		e.preventDefault();
-		setHiddenCheckboxes((prev) => ({
-			...prev,
-			[columnIndex]: {
-				...prev[columnIndex],
-				[task]: true, // Hide the checkbox on right-click
-			},
-		}));
+			}));
+		}
 	};
 
 	// Handle left-click (show checkbox)
@@ -216,6 +219,19 @@ const CheckboxTable = () => {
 		});
 	};
 
+	const checkAllWeeklyBosses = (columnIndex) => {
+		setCheckboxes((prev) => {
+			const updatedCheckboxes = { ...prev };
+			categories["Weekly Bosses"].forEach((boss) => {
+				updatedCheckboxes[columnIndex] = {
+					...updatedCheckboxes[columnIndex],
+					[boss.name]: Array(boss.count).fill(true),
+				};
+			});
+			return updatedCheckboxes;
+		});
+	};
+
 	// Handle manual reset for dailies with confirmation
 	const handleManualResetDailies = () => {
 		if (
@@ -278,14 +294,23 @@ const CheckboxTable = () => {
 							<th></th>
 							{columns.map((columnIndex) => (
 								<th key={columnIndex}>
-									<input
-										type="text"
-										value={columnLabels[columnIndex]}
-										onChange={(e) =>
-											handleLabelChange(columnIndex, e.target.value)
-										}
-										className="character-name-input"
-									/>
+									<div className="column-header">
+										<input
+											type="text"
+											value={columnLabels[columnIndex]}
+											onChange={(e) =>
+												handleLabelChange(columnIndex, e.target.value)
+											}
+											className="character-name-input"
+										/>
+										<button
+											onClick={() => checkAllWeeklyBosses(columnIndex)}
+											className="check-all-bosses-button"
+											title="Check all weekly bosses"
+										>
+											✓ Bosses
+										</button>
+									</div>
 								</th>
 							))}
 						</tr>
