@@ -14,6 +14,7 @@ export const categories = {
 		},
 	],
 	"Weekly Bosses": [
+		{ name: "ALL", type: "weekly", count: 1 },
 		{ name: "Standard", type: "weekly", count: 1 },
 		{ name: "Lotus", type: "weekly", count: 1 },
 		{ name: "Damien", type: "weekly", count: 1 },

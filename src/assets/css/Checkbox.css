@@ -256,3 +256,15 @@ tbody tr.collapsed {
 .check-all-bosses-button:hover {
 	background-color: #45a049;
 }
+
+/* Add to your Checkbox.css */
+.checkbox-group .checkbox-container.all-checkbox {
+	background-color: #f0f0f0;
+	border-radius: 4px;
+	padding: 2px;
+	margin-right: 8px;
+}
+
+.checkbox-group .checkbox-container.all-checkbox input[type="checkbox"] {
+	transform: scale(1.2);
+}

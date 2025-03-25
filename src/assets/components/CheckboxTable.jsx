@@ -124,34 +124,68 @@ const CheckboxTable = () => {
 
 	// Handle checkbox changes
 	const handleCheckboxChange = (columnIndex, task, index) => {
-		if (task === "ALL" && index === 0) {
-			// Special case for the ALL checkbox
+		// Special case for "ALL" in Weekly Bosses
+		if (
+			task === "ALL" &&
+			categories["Weekly Bosses"].some((boss) => boss.name === "ALL")
+		) {
 			setCheckboxes((prev) => {
-				const updated = { ...prev };
-				categories["Weekly Bosses"].forEach((boss) => {
-					if (boss.name !== "ALL") {
-						// Skip the ALL entry itself
-						updated[columnIndex] = {
-							...updated[columnIndex],
-							[boss.name]: Array(boss.count).fill(true),
-						};
-					}
+				const updatedCheckboxes = { ...prev };
+				const allWeeklyBosses = categories["Weekly Bosses"]
+					.filter((boss) => boss.name !== "ALL") // Exclude the ALL entry itself
+					.map((boss) => boss.name);
+
+				// Toggle all weekly bosses based on the ALL checkbox state
+				const newState = !prev[columnIndex]?.[task]?.[index];
+
+				allWeeklyBosses.forEach((bossName) => {
+					updatedCheckboxes[columnIndex] = {
+						...updatedCheckboxes[columnIndex],
+						[bossName]: Array(
+							categories["Weekly Bosses"].find((b) => b.name === bossName)
+								?.count || 1
+						).fill(newState),
+					};
 				});
-				return updated;
+
+				// Also update the ALL checkbox itself
+				updatedCheckboxes[columnIndex] = {
+					...updatedCheckboxes[columnIndex],
+					[task]: {
+						...(prev[columnIndex]?.[task] || {}),
+						[index]: newState,
+					},
+				};
+
+				return updatedCheckboxes;
 			});
 		} else {
 			// Normal checkbox behavior
-			setCheckboxes((prev) => ({
-				...prev,
-				[columnIndex]: {
-					...prev[columnIndex],
-					[task]: {
-						...(prev[columnIndex]?.[task] || {}),
-						[index]: !prev[columnIndex]?.[task]?.[index],
+			setCheckboxes((prev) => {
+				const updatedCheckboxes = {
+					...prev,
+					[columnIndex]: {
+						...prev[columnIndex],
+						[task]: {
+							...(prev[columnIndex]?.[task] || {}),
+							[index]: !prev[columnIndex]?.[task]?.[index],
+						},
 					},
-				},
-			}));
+				};
+				return updatedCheckboxes;
+			});
 		}
+	};
+	// Handle right-click (hide checkbox)
+	const handleRightClick = (e, columnIndex, task) => {
+		e.preventDefault();
+		setHiddenCheckboxes((prev) => ({
+			...prev,
+			[columnIndex]: {
+				...prev[columnIndex],
+				[task]: true, // Hide the checkbox on right-click
+			},
+		}));
 	};
 
 	// Handle left-click (show checkbox)
@@ -166,7 +200,6 @@ const CheckboxTable = () => {
 			}));
 		}
 	};
-
 	// Reset daily checkboxes
 	const resetDailies = () => {
 		setCheckboxes((prev) => {
@@ -204,13 +237,14 @@ const CheckboxTable = () => {
 					if (
 						categories.Weeklies.some((weekly) => weekly.name === task) ||
 						categories["Weekly Bosses"].some((boss) => boss.name === task) ||
-						categories.Events.some((event) => event.name === task) // Include Events
+						categories.Events.some(
+							(event) => event.name === task && event.type === "weekly"
+						)
 					) {
 						updatedCheckboxes[columnIndex][task] = Array(
-							categories.Weeklies.concat(
-								categories["Weekly Bosses"],
-								categories.Events
-							).find((t) => t.name === task).count
+							categories.Weeklies.concat(categories["Weekly Bosses"])
+								.concat(categories.Events)
+								.find((t) => t.name === task)?.count || 1
 						).fill(false);
 					}
 				});
@@ -303,13 +337,13 @@ const CheckboxTable = () => {
 											}
 											className="character-name-input"
 										/>
-										<button
+										{/* <button
 											onClick={() => checkAllWeeklyBosses(columnIndex)}
 											className="check-all-bosses-button"
 											title="Check all weekly bosses"
 										>
 											✓ Bosses
-										</button>
+										</button> */}
 									</div>
 								</th>
 							))}
