@@ -268,3 +268,23 @@ tbody tr.collapsed {
 .checkbox-group .checkbox-container.all-checkbox input[type="checkbox"] {
 	transform: scale(1.2);
 }
+
+.test-controls {
+	margin: 20px 0;
+	text-align: center;
+}
+
+.test-button {
+	padding: 8px 16px;
+	background-color: #ff9800;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+	transition: background-color 0.3s;
+}
+
+.test-button:hover {
+	background-color: #e68a00;
+}
