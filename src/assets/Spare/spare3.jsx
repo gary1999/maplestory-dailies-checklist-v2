@@ -57,9 +57,14 @@ const CheckboxTable = () => {
 			checkNextReset.updateSavedDateIfNeeded();
 		}
 
-		// Check for weekly reset
+		// Check for weekly resets (both Wednesday and Thursday)
+		if (checkNextReset.hasTodayReachedSavedWednesday()) {
+			resetWeeklies("wednesday");
+			checkNextReset.updateSavedWednesdayIfNeeded();
+		}
+
 		if (checkNextReset.hasTodayReachedSavedThursday()) {
-			resetWeeklies();
+			resetWeeklies("thursday");
 			checkNextReset.updateSavedThursdayIfNeeded();
 		}
 	}, []);
@@ -123,18 +128,64 @@ const CheckboxTable = () => {
 	};
 
 	// Handle checkbox changes
-	const handleCheckboxChange = (columnIndex, task, index) => {
+	const handleCheckboxChange = (
+		columnIndex,
+		task,
+		index,
+		toggleAll = false
+	) => {
 		setCheckboxes((prev) => {
-			const updatedCheckboxes = {
-				...prev,
-				[columnIndex]: {
-					...prev[columnIndex],
+			const updatedCheckboxes = { ...prev };
+
+			if (
+				task === "ALL" &&
+				categories["Weekly Bosses"].some((boss) => boss.name === "ALL")
+			) {
+				const allWeeklyBosses = categories["Weekly Bosses"]
+					.filter((boss) => boss.name !== "ALL") // Exclude "ALL"
+					.map((boss) => boss.name);
+
+				// Toggle all weekly bosses based on "ALL" checkbox state
+				const newState = !prev[columnIndex]?.[task]?.[index];
+
+				allWeeklyBosses.forEach((bossName) => {
+					updatedCheckboxes[columnIndex] = {
+						...updatedCheckboxes[columnIndex],
+						[bossName]: Array(
+							categories["Weekly Bosses"].find((b) => b.name === bossName)
+								?.count || 1
+						).fill(newState),
+					};
+				});
+
+				// Also update the ALL checkbox itself
+				updatedCheckboxes[columnIndex] = {
+					...updatedCheckboxes[columnIndex],
+					[task]: {
+						...(prev[columnIndex]?.[task] || {}),
+						[index]: newState,
+					},
+				};
+			} else if (toggleAll) {
+				// Toggling the entire cell should toggle all checkboxes inside it
+				const newState = !prev[columnIndex]?.[task]?.[0]; // Use first checkbox state as reference
+				updatedCheckboxes[columnIndex] = {
+					...updatedCheckboxes[columnIndex],
+					[task]: Array(
+						categories["Weekly Bosses"].find((b) => b.name === task)?.count || 1
+					).fill(newState),
+				};
+			} else {
+				// Normal checkbox toggle behavior
+				updatedCheckboxes[columnIndex] = {
+					...updatedCheckboxes[columnIndex],
 					[task]: {
 						...(prev[columnIndex]?.[task] || {}),
 						[index]: !prev[columnIndex]?.[task]?.[index],
 					},
-				},
-			};
+				};
+			}
+
 			return updatedCheckboxes;
 		});
 	};
@@ -163,7 +214,6 @@ const CheckboxTable = () => {
 			}));
 		}
 	};
-
 	// Reset daily checkboxes
 	const resetDailies = () => {
 		setCheckboxes((prev) => {
@@ -193,22 +243,23 @@ const CheckboxTable = () => {
 	};
 
 	// Reset weekly checkboxes
-	const resetWeeklies = () => {
+	const resetWeeklies = (resetDay) => {
 		setCheckboxes((prev) => {
 			const updatedCheckboxes = { ...prev };
 			Object.keys(updatedCheckboxes).forEach((columnIndex) => {
 				Object.keys(updatedCheckboxes[columnIndex]).forEach((task) => {
-					if (
-						categories.Weeklies.some((weekly) => weekly.name === task) ||
-						categories["Weekly Bosses"].some((boss) => boss.name === task) ||
-						categories.Events.some((event) => event.name === task) // Include Events
-					) {
-						updatedCheckboxes[columnIndex][task] = Array(
-							categories.Weeklies.concat(
-								categories["Weekly Bosses"],
-								categories.Events
-							).find((t) => t.name === task).count
-						).fill(false);
+					// Find the task in any weekly category
+					const taskData = [
+						...categories.Weeklies,
+						...categories["Weekly Bosses"],
+						...categories.Events.filter((e) => e.type === "weekly"),
+					].find((t) => t.name === task);
+
+					// Only reset tasks that match the current reset day
+					if (taskData && taskData.resetDay === resetDay) {
+						updatedCheckboxes[columnIndex][task] = Array(taskData.count).fill(
+							false
+						);
 					}
 				});
 			});
@@ -229,14 +280,18 @@ const CheckboxTable = () => {
 	};
 
 	// Handle manual reset for weeklies with confirmation
-	const handleManualResetWeeklies = () => {
+	const handleManualResetWeeklies = (resetDay) => {
 		if (
 			window.confirm(
-				"Are you sure you want to reset all weekly tasks? This cannot be undone."
+				`Are you sure you want to reset all ${resetDay} weekly tasks? This cannot be undone.`
 			)
 		) {
-			resetWeeklies();
-			checkNextReset.updateSavedThursdayIfNeeded();
+			resetWeeklies(resetDay);
+			if (resetDay === "thursday") {
+				checkNextReset.updateSavedThursdayIfNeeded();
+			} else if (resetDay === "wednesday") {
+				checkNextReset.updateSavedWednesdayIfNeeded();
+			}
 		}
 	};
 
@@ -278,14 +333,23 @@ const CheckboxTable = () => {
 							<th></th>
 							{columns.map((columnIndex) => (
 								<th key={columnIndex}>
-									<input
-										type="text"
-										value={columnLabels[columnIndex]}
-										onChange={(e) =>
-											handleLabelChange(columnIndex, e.target.value)
-										}
-										className="character-name-input"
-									/>
+									<div className="column-header">
+										<input
+											type="text"
+											value={columnLabels[columnIndex]}
+											onChange={(e) =>
+												handleLabelChange(columnIndex, e.target.value)
+											}
+											className="character-name-input"
+										/>
+										{/* <button
+											onClick={() => checkAllWeeklyBosses(columnIndex)}
+											className="check-all-bosses-button"
+											title="Check all weekly bosses"
+										>
+											✓ Bosses
+										</button> */}
+									</div>
 								</th>
 							))}
 						</tr>
@@ -310,12 +374,26 @@ const CheckboxTable = () => {
 											{columns.map((columnIndex) => (
 												<td
 													key={columnIndex}
-													onClick={(e) => handleLeftClick(e, columnIndex, name)} // Show checkbox on left-click
+													onClick={() => {
+														if (hiddenCheckboxes[columnIndex]?.[name]) {
+															// If hidden, restore visibility instead of toggling checkboxes
+															setHiddenCheckboxes((prev) => ({
+																...prev,
+																[columnIndex]: {
+																	...prev[columnIndex],
+																	[name]: false,
+																},
+															}));
+														} else {
+															// If visible, toggle all checkboxes
+															handleCheckboxChange(columnIndex, name, 0, true);
+														}
+													}}
 													onContextMenu={(e) =>
 														handleRightClick(e, columnIndex, name)
-													} // Hide checkbox on right-click
+													} // Keep right-click to hide
+													style={{ cursor: "pointer" }} // Visual cue that it's clickable
 												>
-													{/* Render the checkboxes only if not hidden */}
 													{!hiddenCheckboxes[columnIndex]?.[name] ? (
 														<div className="checkbox-group">
 															{Array.from({ length: count }, (_, index) => (
@@ -330,6 +408,7 @@ const CheckboxTable = () => {
 																				index
 																			] || false
 																		}
+																		onClick={(e) => e.stopPropagation()} // Prevent cell click from triggering
 																		onChange={() =>
 																			handleCheckboxChange(
 																				columnIndex,
@@ -356,11 +435,20 @@ const CheckboxTable = () => {
 
 			{/* Manual Reset Buttons */}
 			<div className="reset-buttons">
+				<button
+					onClick={() => handleManualResetWeeklies("wednesday")}
+					className="reset-button"
+				>
+					Reset Wednesday Weeklies
+				</button>
+				<button
+					onClick={() => handleManualResetWeeklies("thursday")}
+					className="reset-button"
+				>
+					Reset Thursday Weeklies
+				</button>
 				<button onClick={handleManualResetDailies} className="reset-button">
 					Reset Dailies
-				</button>
-				<button onClick={handleManualResetWeeklies} className="reset-button">
-					Reset Weeklies
 				</button>
 			</div>
 

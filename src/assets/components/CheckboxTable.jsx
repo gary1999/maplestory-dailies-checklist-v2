@@ -69,6 +69,47 @@ const CheckboxTable = () => {
 		}
 	}, []);
 
+	const [lastResetTime, setLastResetTime] = useState(null);
+
+	const checkForResets = async () => {
+		checkNextReset.loadUTCTime();
+		let needsUpdate = false;
+
+		// Daily reset check
+		if (checkNextReset.hasTodayReachedSavedDate()) {
+			await resetDailies();
+			checkNextReset.updateSavedDateIfNeeded();
+			needsUpdate = true;
+		}
+
+		// Wednesday reset check
+		if (checkNextReset.hasTodayReachedSavedWednesday()) {
+			await resetWeeklies("wednesday");
+			checkNextReset.updateSavedWednesdayIfNeeded();
+			needsUpdate = true;
+		}
+
+		// Thursday reset check
+		if (checkNextReset.hasTodayReachedSavedThursday()) {
+			await resetWeeklies("thursday");
+			checkNextReset.updateSavedThursdayIfNeeded();
+			needsUpdate = true;
+		}
+
+		if (needsUpdate) {
+			setLastResetTime(new Date().toLocaleTimeString());
+		}
+	};
+
+	useEffect(() => {
+		// Initial check on load
+		checkForResets();
+
+		// Set up interval to check every minute
+		const interval = setInterval(checkForResets, 60000);
+		return () => clearInterval(interval);
+	}, []);
+
 	// Save number of columns to localStorage whenever it changes
 	useEffect(() => {
 		localStorage.setItem("numberOfColumns", numberOfColumns.toString());
@@ -216,54 +257,59 @@ const CheckboxTable = () => {
 	};
 	// Reset daily checkboxes
 	const resetDailies = () => {
-		setCheckboxes((prev) => {
-			const updatedCheckboxes = { ...prev };
-			Object.keys(updatedCheckboxes).forEach((columnIndex) => {
-				Object.keys(updatedCheckboxes[columnIndex]).forEach((task) => {
-					// Check if the task exists in Dailies OR Events with type 'daily'
-					if (
-						categories.Dailies.some((daily) => daily.name === task) ||
-						categories.Events.some(
-							(event) => event.name === task && event.type === "daily"
-						)
-					) {
-						// Find the task and reset its count properly
-						const taskData = categories.Dailies.concat(categories.Events).find(
-							(t) => t.name === task && t.type === "daily"
-						);
+		return new Promise((resolve) => {
+			setCheckboxes((prev) => {
+				const updatedCheckboxes = { ...prev };
+				Object.keys(updatedCheckboxes).forEach((columnIndex) => {
+					Object.keys(updatedCheckboxes[columnIndex]).forEach((task) => {
+						// Check if the task exists in Dailies OR Events with type 'daily'
+						if (
+							categories.Dailies.some((daily) => daily.name === task) ||
+							categories.Events.some(
+								(event) => event.name === task && event.type === "daily"
+							)
+						) {
+							// Find the task and reset its count properly
+							const taskData = categories.Dailies.concat(
+								categories.Events
+							).find((t) => t.name === task && t.type === "daily");
 
-						updatedCheckboxes[columnIndex][task] = Array(
-							taskData?.count || 1
-						).fill(false);
-					}
+							updatedCheckboxes[columnIndex][task] = Array(
+								taskData?.count || 1
+							).fill(false);
+						}
+					});
 				});
+				resolve();
+				return updatedCheckboxes;
 			});
-			return updatedCheckboxes;
 		});
 	};
 
 	// Reset weekly checkboxes
 	const resetWeeklies = (resetDay) => {
-		setCheckboxes((prev) => {
-			const updatedCheckboxes = { ...prev };
-			Object.keys(updatedCheckboxes).forEach((columnIndex) => {
-				Object.keys(updatedCheckboxes[columnIndex]).forEach((task) => {
-					// Find the task in any weekly category
-					const taskData = [
-						...categories.Weeklies,
-						...categories["Weekly Bosses"],
-						...categories.Events.filter((e) => e.type === "weekly"),
-					].find((t) => t.name === task);
+		return new Promise((resolve) => {
+			setCheckboxes((prev) => {
+				const updatedCheckboxes = { ...prev };
+				Object.keys(updatedCheckboxes).forEach((columnIndex) => {
+					Object.keys(updatedCheckboxes[columnIndex]).forEach((task) => {
+						// Find the task in any weekly category
+						const taskData = [
+							...categories.Weeklies,
+							...categories["Weekly Bosses"],
+							...categories.Events.filter((e) => e.type === "weekly"),
+						].find((t) => t.name === task);
 
-					// Only reset tasks that match the current reset day
-					if (taskData && taskData.resetDay === resetDay) {
-						updatedCheckboxes[columnIndex][task] = Array(taskData.count).fill(
-							false
-						);
-					}
+						// Only reset tasks that match the current reset day
+						if (taskData && taskData.resetDay === resetDay) {
+							updatedCheckboxes[columnIndex][task] = Array(taskData.count).fill(
+								false
+							);
+						}
+					});
 				});
+				return updatedCheckboxes;
 			});
-			return updatedCheckboxes;
 		});
 	};
 
@@ -451,6 +497,21 @@ const CheckboxTable = () => {
 					Reset Dailies
 				</button>
 			</div>
+
+			{lastResetTime && (
+				<div className="reset-notification">
+					Tasks were automatically reset at {lastResetTime}
+				</div>
+			)}
+
+			<button
+				onClick={() => {
+					checkNextReset.setYesterdayDate();
+					checkForResets();
+				}}
+			>
+				Test Daily Reset
+			</button>
 
 			<div className="column-selector">
 				<p>Number of Characters:</p>

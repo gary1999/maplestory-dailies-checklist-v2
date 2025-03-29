@@ -6,7 +6,7 @@ import Clock from "./assets/components/Clock";
 import Navbar from "./assets/components/Navbar";
 import CheckboxTable from "./assets/components/CheckboxTable";
 import NotesPage from "./assets/components/NotesPage";
-
+import Misc from "./assets/components/Misc";
 function App() {
 	return (
 		<Router>
@@ -15,7 +15,7 @@ function App() {
 				<Route path="/" element={<CheckboxTable />} />
 				<Route path="/notes" element={<NotesPage />} />
 				{/* <Route path="/enhancements" element={#} /> */}
-				{/* <Route path="/misc" element={#} /> */}
+				<Route path="/misc" element={<Misc />} />
 			</Routes>
 		</Router>
 	);

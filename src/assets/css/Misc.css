@@ -1,0 +1,162 @@
+/* NX Conversion Styles */
+.nx-container {
+	background: var(--card-bg);
+	border-radius: var(--border-radius);
+	padding: 1.5rem;
+	margin: 1.5rem 0;
+}
+
+.nx-controls {
+	margin-bottom: 1.5rem;
+}
+
+.nx-rate-input {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.rate-display {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.mesos-amount {
+	font-weight: 600;
+	color: var(--primary);
+}
+
+.equals {
+	color: var(--text-secondary);
+}
+
+.nx-input {
+	width: 80px;
+	padding: 0.5rem;
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	text-align: center;
+}
+
+.nx-label {
+	font-weight: 600;
+	color: var(--primary);
+}
+
+.nx-items {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.nx-header {
+	display: grid;
+	grid-template-columns: 2fr 1fr 1fr;
+	font-weight: 600;
+	padding-bottom: 0.5rem;
+	border-bottom: 2px solid var(--border-color);
+}
+
+.nx-item {
+	display: grid;
+	grid-template-columns: 2fr 1fr 1fr;
+	align-items: center;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid var(--border-light);
+}
+
+.item-name {
+	font-weight: 500;
+}
+
+.item-price-nx {
+	text-align: right;
+	padding-right: 1rem;
+	color: var(--primary);
+}
+
+.item-price-mesos {
+	text-align: right;
+	font-weight: 600;
+}
+
+.test-buttons {
+	margin: 20px 0;
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+}
+
+.test-buttons button {
+	padding: 8px 12px;
+	background-color: #ff9800;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.reset-notification {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	padding: 10px 15px;
+	background-color: #4caf50;
+	color: white;
+	border-radius: 4px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	z-index: 1000;
+	animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.test-buttons {
+	margin: 15px 0;
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+}
+
+.test-buttons button {
+	padding: 8px 12px;
+	background-color: #ff9800;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.reset-notification {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	padding: 10px 15px;
+	background-color: #4caf50;
+	color: white;
+	border-radius: 4px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	z-index: 1000;
+	animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
