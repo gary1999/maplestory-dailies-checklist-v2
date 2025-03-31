@@ -116,6 +116,14 @@ const NotesPage = () => {
 		setTaskInputs((prev) => ({ ...prev, [character]: "" }));
 	};
 
+	// Handle key down in task input
+	const handleTaskInputKeyDown = (character, e) => {
+		if (e.key === "Enter") {
+			e.preventDefault(); // Prevent form submission or new line
+			addTask(character, taskInputs[character] || "");
+		}
+	};
+
 	// Toggle task completion
 	const toggleTask = (character, index) => {
 		setNotes((prevNotes) => {
@@ -219,6 +227,7 @@ const NotesPage = () => {
 										[character]: e.target.value,
 									}))
 								}
+								onKeyDown={(e) => handleTaskInputKeyDown(character, e)}
 								placeholder="Add a task..."
 								aria-label={`Add a task for ${character}`}
 							/>

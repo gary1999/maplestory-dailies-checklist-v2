@@ -10,7 +10,6 @@ const Misc = () => {
 			{/* Your existing misc content */}
 
 			<section className="misc-section">
-				<h2>NX Currency Exchange</h2>
 				<NXItemList />
 			</section>
 

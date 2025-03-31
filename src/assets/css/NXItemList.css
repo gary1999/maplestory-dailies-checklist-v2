@@ -1,0 +1,167 @@
+/* Dark Theme Container */
+.nx-container {
+	padding: 1rem;
+	max-width: 100%;
+	margin: 0 auto;
+	background-color: #1e1e1e;
+	color: #f5f5f5;
+	min-height: 100vh;
+}
+
+.nx-title {
+	color: #1abc9c;
+	text-align: center;
+	margin-bottom: 1.5rem;
+}
+
+/* Controls Section */
+.nx-controls {
+	background-color: #333;
+	padding: 1rem;
+	border-radius: 8px;
+	margin-bottom: 1rem;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.rate-label {
+	display: block;
+	margin-bottom: 0.5rem;
+	color: #f5f5f5;
+}
+
+.rate-display {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.mesos-amount {
+	color: #4caf50;
+	font-weight: bold;
+}
+
+.equals {
+	color: #888;
+}
+
+.nx-input {
+	padding: 0.5rem;
+	background-color: #222;
+	color: #f5f5f5;
+	border: 3px solid #444;
+	border-radius: 6px;
+	width: 100px;
+	text-align: center;
+	font-weight: bold;
+	font-size: 1rem;
+}
+
+.nx-input:focus {
+	border-color: #1abc9c;
+	outline: none;
+}
+
+.nx-label {
+	color: #1abc9c;
+	font-weight: bold;
+}
+
+/* Items List */
+.nx-items {
+	background-color: #333;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.nx-header {
+	display: grid;
+	grid-template-columns: 2fr 1fr 1fr;
+	padding: 1rem;
+	background-color: #444;
+	color: #1abc9c;
+	font-weight: bold;
+	border-bottom: 3px solid #1e1e1e;
+}
+
+.nx-item {
+	display: grid;
+	grid-template-columns: 2fr 1fr 1fr;
+	padding: 1rem;
+	align-items: center;
+	border-bottom: 3px solid #444;
+	transition: background-color 0.3s ease;
+}
+
+.nx-item:last-child {
+	border-bottom: none;
+}
+
+.nx-item:hover {
+	background-color: #3a3a3a;
+}
+
+.item-name {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: #f5f5f5;
+}
+
+.item-icon {
+	font-size: 1.2em;
+}
+
+.price-tag {
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	border-radius: 6px;
+	font-weight: bold;
+	text-align: center;
+}
+
+.nx-tag {
+	background-color: rgba(25, 118, 210, 0.2);
+	color: #64b5f6;
+	border: 2px solid #1976d2;
+}
+
+.mesos-tag {
+	background-color: rgba(46, 125, 50, 0.2);
+	color: #81c784;
+	border: 2px solid #2e7d32;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.nx-header,
+	.nx-item {
+		grid-template-columns: 1.5fr 1fr 1fr;
+	}
+
+	.nx-input {
+		width: 80px;
+	}
+}
+
+@media (max-width: 480px) {
+	.nx-header,
+	.nx-item {
+		grid-template-columns: 1fr;
+		gap: 1rem;
+		text-align: center;
+	}
+
+	.rate-display {
+		justify-content: center;
+	}
+
+	.item-name {
+		justify-content: center;
+	}
+
+	.price-tag {
+		width: 100%;
+	}
+}
