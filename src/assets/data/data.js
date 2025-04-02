@@ -43,5 +43,11 @@ export const categories = {
 			count: 5,
 			resetDay: "wednesday",
 		},
+		{
+			name: "Demon Slayer Breath",
+			type: "weekly",
+			count: 5,
+			resetDay: "wednesday",
+		},
 	],
 };
