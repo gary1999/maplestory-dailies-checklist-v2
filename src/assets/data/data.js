@@ -28,6 +28,9 @@ export const categories = {
 		{ name: "Kalos", type: "weekly", count: 1, resetDay: "thursday" },
 		{ name: "Kaling", type: "weekly", count: 1, resetDay: "thursday" },
 	],
+	"Monthly Bosses": [
+		{ name: "Black Mage", type: "monthly", count: 1, resetDay: "month" },
+	],
 	Events: [
 		// { name: "Ride or Die", type: "weekly" },
 		// { name: "Burning 6k", type: "weekly" },

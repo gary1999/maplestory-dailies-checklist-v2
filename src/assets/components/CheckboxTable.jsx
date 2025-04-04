@@ -67,6 +67,11 @@ const CheckboxTable = () => {
 			resetWeeklies("thursday");
 			checkNextReset.updateSavedThursdayIfNeeded();
 		}
+
+		if (checkNextReset.hasTodayReachedSavedMonthly()) {
+			resetMonthlies();
+			checkNextReset.updateSavedMonthlyIfNeeded();
+		}
 	}, []);
 
 	const [lastResetTime, setLastResetTime] = useState(null);
@@ -93,6 +98,13 @@ const CheckboxTable = () => {
 		if (checkNextReset.hasTodayReachedSavedThursday()) {
 			await resetWeeklies("thursday");
 			checkNextReset.updateSavedThursdayIfNeeded();
+			needsUpdate = true;
+		}
+
+		// Monthly reset check
+		if (checkNextReset.hasTodayReachedSavedMonthly()) {
+			await resetMonthlies();
+			checkNextReset.updateSavedMonthlyIfNeeded();
 			needsUpdate = true;
 		}
 
@@ -175,45 +187,26 @@ const CheckboxTable = () => {
 		index,
 		toggleAll = false
 	) => {
+		// Handle "ALL" checkbox for monthly bosses
+		if (
+			task === "ALL" &&
+			categories["Monthly Bosses"].some((boss) => boss.name === "ALL")
+		) {
+			handleMonthlyBossAllCheck(columnIndex, task, index);
+			return;
+		}
+
 		setCheckboxes((prev) => {
 			const updatedCheckboxes = { ...prev };
 
-			if (
-				task === "ALL" &&
-				categories["Weekly Bosses"].some((boss) => boss.name === "ALL")
-			) {
-				const allWeeklyBosses = categories["Weekly Bosses"]
-					.filter((boss) => boss.name !== "ALL") // Exclude "ALL"
-					.map((boss) => boss.name);
-
-				// Toggle all weekly bosses based on "ALL" checkbox state
-				const newState = !prev[columnIndex]?.[task]?.[index];
-
-				allWeeklyBosses.forEach((bossName) => {
-					updatedCheckboxes[columnIndex] = {
-						...updatedCheckboxes[columnIndex],
-						[bossName]: Array(
-							categories["Weekly Bosses"].find((b) => b.name === bossName)
-								?.count || 1
-						).fill(newState),
-					};
-				});
-
-				// Also update the ALL checkbox itself
-				updatedCheckboxes[columnIndex] = {
-					...updatedCheckboxes[columnIndex],
-					[task]: {
-						...(prev[columnIndex]?.[task] || {}),
-						[index]: newState,
-					},
-				};
-			} else if (toggleAll) {
+			if (toggleAll) {
 				// Toggling the entire cell should toggle all checkboxes inside it
-				const newState = !prev[columnIndex]?.[task]?.[0]; // Use first checkbox state as reference
+				const newState = !prev[columnIndex]?.[task]?.[0];
 				updatedCheckboxes[columnIndex] = {
 					...updatedCheckboxes[columnIndex],
 					[task]: Array(
-						categories["Weekly Bosses"].find((b) => b.name === task)?.count || 1
+						categories["Monthly Bosses"].find((b) => b.name === task)?.count ||
+							1
 					).fill(newState),
 				};
 			} else {
@@ -313,6 +306,29 @@ const CheckboxTable = () => {
 		});
 	};
 
+	const resetMonthlies = () => {
+		return new Promise((resolve) => {
+			setCheckboxes((prev) => {
+				const updatedCheckboxes = { ...prev };
+				Object.keys(updatedCheckboxes).forEach((columnIndex) => {
+					Object.keys(updatedCheckboxes[columnIndex]).forEach((task) => {
+						// Check if the task exists in Monthly Bosses
+						if (
+							categories["Monthly Bosses"].some((boss) => boss.name === task)
+						) {
+							updatedCheckboxes[columnIndex][task] = Array(
+								categories["Monthly Bosses"].find((b) => b.name === task)
+									?.count || 1
+							).fill(false);
+						}
+					});
+				});
+				resolve();
+				return updatedCheckboxes;
+			});
+		});
+	};
+
 	// Handle manual reset for dailies with confirmation
 	const handleManualResetDailies = () => {
 		if (
@@ -338,6 +354,17 @@ const CheckboxTable = () => {
 			} else if (resetDay === "wednesday") {
 				checkNextReset.updateSavedWednesdayIfNeeded();
 			}
+		}
+	};
+
+	const handleManualResetMonthlies = () => {
+		if (
+			window.confirm(
+				"Are you sure you want to reset all monthly bosses? This cannot be undone."
+			)
+		) {
+			resetMonthlies();
+			checkNextReset.updateSavedMonthlyIfNeeded();
 		}
 	};
 
@@ -495,6 +522,9 @@ const CheckboxTable = () => {
 				</button>
 				<button onClick={handleManualResetDailies} className="reset-button">
 					Reset Dailies
+				</button>
+				<button onClick={handleManualResetMonthlies} className="reset-button">
+					Reset Monthly Bosses
 				</button>
 			</div>
 

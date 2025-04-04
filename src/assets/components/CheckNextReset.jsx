@@ -7,7 +7,8 @@ const getUTCMidnight = () => {
 const loadUTCTime = () => {
 	const savedDateStr = localStorage.getItem("savedDateTomorrow");
 	const savedDateStrThursday = localStorage.getItem("savedDateThursday");
-	const savedDateStrWednesday = localStorage.getItem("savedDateWednesday"); // Load Wednesday
+	const savedDateStrWednesday = localStorage.getItem("savedDateWednesday");
+	const savedDateStrMonthly = localStorage.getItem("savedDateMonthly");
 
 	if (!savedDateStr) {
 		saveTomorrowDate();
@@ -17,6 +18,9 @@ const loadUTCTime = () => {
 	}
 	if (!savedDateStrWednesday) {
 		saveNextWednesday();
+	}
+	if (!savedDateStrMonthly) {
+		saveNextMonth();
 	}
 };
 
@@ -31,6 +35,9 @@ window.onload = () => {
 	}
 	if (hasTodayReachedSavedWednesday()) {
 		updateSavedWednesdayIfNeeded();
+	}
+	if (hasTodayReachedSavedMonthly()) {
+		updateSavedMonthlyIfNeeded();
 	}
 };
 
@@ -73,24 +80,36 @@ function hasTodayReachedSavedWednesday() {
 	return hasDatePassed(savedDateStrWednesday);
 }
 
+function hasTodayReachedSavedMonthly() {
+	const savedDateStrMonthly = localStorage.getItem("savedDateMonthly");
+	return hasDatePassed(savedDateStrMonthly);
+}
+
 function updateSavedDateIfNeeded() {
 	if (hasTodayReachedSavedDate()) {
-		saveTomorrowDate(); // Move the saved date to the next tomorrow
+		saveTomorrowDate();
 		console.log("Updated saved date to the next tomorrow.");
 	}
 }
 
 function updateSavedThursdayIfNeeded() {
 	if (hasTodayReachedSavedThursday()) {
-		saveNextThursday(); // Move the saved date to the next Thursday
+		saveNextThursday();
 		console.log("Updated saved date to the next Thursday.");
 	}
 }
 
 function updateSavedWednesdayIfNeeded() {
 	if (hasTodayReachedSavedWednesday()) {
-		saveNextWednesday(); // Move the saved date to the next Wednesday
+		saveNextWednesday();
 		console.log("Updated saved date to the next Wednesday.");
+	}
+}
+
+function updateSavedMonthlyIfNeeded() {
+	if (hasTodayReachedSavedMonthly()) {
+		saveNextMonth();
+		console.log("Updated saved date to the next month.");
 	}
 }
 
@@ -118,6 +137,18 @@ function saveNextWednesday() {
 
 	localStorage.setItem("savedDateWednesday", nextWednesday.toISOString());
 	console.log("Saved Next Wednesday (UTC):", nextWednesday.toISOString());
+}
+
+function saveNextMonth() {
+	const todayUtc = getUTCMidnight();
+	const nextMonth = new Date(todayUtc);
+
+	// Set to first day of next month at midnight UTC
+	nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1, 1);
+	nextMonth.setUTCHours(0, 0, 0, 0);
+
+	localStorage.setItem("savedDateMonthly", nextMonth.toISOString());
+	console.log("Saved Next Month (UTC):", nextMonth.toISOString());
 }
 
 const setYesterdayDate = () => {
@@ -151,6 +182,7 @@ const setDateBack = () => {
 	localStorage.setItem("savedDateTomorrow", yesterdayUtc.toISOString());
 	localStorage.setItem("savedDateThursday", yesterdayUtc.toISOString());
 	localStorage.setItem("savedDateWednesday", yesterdayUtc.toISOString());
+	localStorage.setItem("savedDateMonthly", yesterdayUtc.toISOString());
 
 	console.log(
 		"⏳ Set saved dates back to yesterday:",
@@ -166,6 +198,8 @@ const checkNextReset = {
 		hasDatePassed(localStorage.getItem("savedDateThursday")),
 	hasTodayReachedSavedWednesday: () =>
 		hasDatePassed(localStorage.getItem("savedDateWednesday")),
+	hasTodayReachedSavedMonthly: () =>
+		hasDatePassed(localStorage.getItem("savedDateMonthly")),
 
 	setDateBack,
 
@@ -177,6 +211,9 @@ const checkNextReset = {
 
 	saveNextWednesday,
 	updateSavedWednesdayIfNeeded,
+
+	saveNextMonth,
+	updateSavedMonthlyIfNeeded,
 
 	setYesterdayDate,
 	setTodayDate,
