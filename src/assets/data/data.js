@@ -36,6 +36,11 @@ export const categories = {
 		// { name: "Burning 6k", type: "weekly" },
 		// { name: "Tirnog 6k", type: "weekly" },
 		{
+			name: "Daily Check In",
+			type: "daily",
+			count: 1,
+		},
+		{
 			name: "Rock Spirit Check In",
 			type: "daily",
 			count: 1,
@@ -48,6 +53,12 @@ export const categories = {
 		},
 		{
 			name: "Demon Slayer Breath",
+			type: "weekly",
+			count: 5,
+			resetDay: "wednesday",
+		},
+		{
+			name: "Demon Slayer Coin",
 			type: "weekly",
 			count: 5,
 			resetDay: "wednesday",
