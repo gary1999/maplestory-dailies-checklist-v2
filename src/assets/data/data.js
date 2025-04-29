@@ -3,6 +3,7 @@ export const categories = {
 		{ name: "Arcane River", type: "daily", count: 1 },
 		{ name: "Grandis", type: "daily", count: 1 },
 		{ name: "Monster Park", type: "daily", count: 1 },
+		{ name: "Daily Check In", type: "daily", count: 1 },
 		{ name: "Bosses", type: "daily", count: 1 },
 		{ name: "Auto-Harvest", type: "daily", count: 1 },
 	],
@@ -35,11 +36,6 @@ export const categories = {
 		// { name: "Ride or Die", type: "weekly" },
 		// { name: "Burning 6k", type: "weekly" },
 		// { name: "Tirnog 6k", type: "weekly" },
-		{
-			name: "Daily Check In",
-			type: "daily",
-			count: 1,
-		},
 		{
 			name: "1000 Mobs Check In",
 			type: "weekly",
