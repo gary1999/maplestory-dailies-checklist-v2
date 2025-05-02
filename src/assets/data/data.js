@@ -49,6 +49,12 @@ export const categories = {
 			resetDay: "wednesday",
 		},
 		{
+			name: "Snack Break",
+			type: "weekly",
+			count: 3,
+			resetDay: "wednesday",
+		},
+		{
 			name: "Weekly Boss Coin",
 			type: "weekly",
 			count: 1,
